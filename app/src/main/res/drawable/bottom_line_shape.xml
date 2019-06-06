@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--shape用于定义形状，有四种形状(矩形rectangle| 椭圆oval | 直线line | 圆形ring)-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="line">
+    <item android:left="0dp" android:right="0dp">
+        <shape>
+        <solid android:color="@color/black" />
+        </shape>
+    </item>
+    <item android:bottom="1dp">
+        <shape>
+        <solid android:color="@color/bg_color" />
+        </shape>
+    </item>
+
+</layer-list>
