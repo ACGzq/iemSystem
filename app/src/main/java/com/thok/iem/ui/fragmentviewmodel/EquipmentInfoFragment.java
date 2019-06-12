@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
@@ -16,10 +17,21 @@ import android.widget.ImageView;
 import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
+import com.lzy.okgo.OkGo;
+
+import com.lzy.okgo.model.Response;
+import com.lzy.okgo.request.base.Request;
 import com.thok.iem.R;
+import com.thok.iem.httpUtil.ImageRequest;
+import com.thok.iem.httpUtil.OkGoJsonCallback;
+import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.DeviceBean;
+import com.thok.iem.model.DevicesResponse;
+import com.thok.iem.model.SearchDeviceRequestBean;
 import com.thok.iem.utils.QuickAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -32,12 +44,14 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
-    private ArrayList<String> list = new ArrayList<>();
+    private ArrayList<DeviceBean> list = new ArrayList<>();
     QuickAdapter adapter;
     Context context;
     private OnListFragmentInteractionListener mListener;
     boolean flag;
     private SearchView input_edit;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private String equipmentInfoString = "设备编号:%s %n规格型号: %s %n存放位置:%s %n设备状态:%s";
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -75,18 +89,24 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
         im.setImageResource(R.drawable.ic_center_focus_weak_black_24dp);
         im.setOnClickListener(this);
         input_edit.setOnQueryTextListener(this);
+        swipeRefreshLayout = rootView.findViewById(R.id.info_list_swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(() -> search(input_edit.getQuery().toString()));
         context = rootView.getContext();
         RecyclerView recyclerView = rootView.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        adapter = new QuickAdapter<String>(list) {
+        adapter = new QuickAdapter<DeviceBean>(list) {
             @Override
             public int getLayoutId(int viewType) {
                 return R.layout.list_item_with_image;
             }
 
             @Override
-            public void convert(QuickVH holder, String data, int position) {
-                holder.setText(R.id.item_text,data);
+            public void convert(QuickVH holder, DeviceBean data, int position) {
+                holder.setText(R.id.item_title,data.getDeviceName());
+                holder.setText(R.id.item_text,String.format(equipmentInfoString,data.getDeviceNo(),data.getSpecificationType(),data.getPosition(),data.getStatus()==0?"运行":"停机"));
+                holder.setText(R.id.state_text,data.getStatus()==0?"运行":"停机");
+                ImageRequest.getRequest(context).getImage(data.getImgUrl(),holder.getView(R.id.img_view));
+
             }
 
             @Override
@@ -129,6 +149,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
         mListener = null;
     }
 
+
     @Override
     public void onClick(View v) {
         Log.d("iem_EqInfoFragment","id="+v.getId()+
@@ -141,19 +162,75 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
                 startSoftScan();
                 break;
             case R.id.search_bt:
-                search();
+                search(input_edit.getQuery().toString());
                 break;
 
         }
     }
 
-    public void search(){
+    public void search(String keyWord){
         list.clear();
         Log.d("iem_EqInfoFragment","search");
-        for(int i =0;i<20;i++){
-            list.add("设备编号：00"+i);
-        }
-        adapter.notifyDataSetChanged();
+        SearchDeviceRequestBean sdrBean = new SearchDeviceRequestBean();
+        sdrBean.setDeviceName("堆垛机");
+        sdrBean.setDeviceNum(keyWord);
+        sdrBean.setToken("1");
+        Log.d("iem_EqInfoFragment",sdrBean.toJsonString());
+        OkGo.<DevicesResponse>post(RequestURLs.URL_SEARCH_DEVICE)
+                .tag(this)
+                .upJson(sdrBean.toJsonString())
+                .execute(new OkGoJsonCallback<DevicesResponse>() {
+                    @Override
+                    public void onStart(Request<DevicesResponse, ? extends Request> request) {
+                        Log.d("iem_EqInfoFragment", "onStart");
+                        if(!swipeRefreshLayout.isRefreshing()){
+                            swipeRefreshLayout.setRefreshing(true);
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Response<DevicesResponse> response) {
+                        DevicesResponse devices = response.body();
+                        Log.d("iem_EqInfoFragment", "onSuccess: "+response.body());
+                        if(devices!=null){
+                            List<DeviceBean> deviceList = devices.getData();
+                            list.clear();
+                            for(DeviceBean deviceBean:deviceList){
+                                list.add(deviceBean);
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCacheSuccess(Response<DevicesResponse> response) {
+                        Log.d("iem_EqInfoFragment", "onSuccess: "+response.body());
+                    }
+
+                    @Override
+                    public void onErrorMessage(String str) {
+                        if (swipeRefreshLayout.isRefreshing()){
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                        Toast.makeText(context,str,Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Log.d("iem_EqInfoFragment", "onFinish");
+                        if (swipeRefreshLayout.isRefreshing()){
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                    }
+
+                   /* @Override
+                    public DevicesResponse convertResponse(okhttp3.Response response) throws Throwable {
+                        String jsonObjString = response.body().string();
+                        Log.d("iem_EqInfoFragment", "convertResponse:"+ jsonObjString);
+                       return super.convertResponse(response);
+                    }*/
+        });
+
     }
     public void startSoftScan(){
         flag = true;
@@ -172,11 +249,13 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
     @Override
     public boolean onQueryTextSubmit(String s) {
         Log.d("iem_EqInfoFragment",s);
+        search(s);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String s) {
+
         return false;
     }
 

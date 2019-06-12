@@ -31,6 +31,8 @@ import com.thok.iem.R;
 import com.thok.iem.utils.AutoFilterListAdapter;
 import com.thok.iem.utils.QuickAdapter;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.OnItemClickListener, SearchView.OnQueryTextListener, AdapterView.OnItemClickListener {
@@ -44,7 +46,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     private Intent intent;
     private String[] mStrs = {"ACG00011", "AVG00011", "AVG00112", "BBC12345","TNT23333","FBI WARRING"};
     private ListView mListView;
-    private boolean needHint = true;
+    //private boolean needHint = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +78,12 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         mListView = findViewById(R.id.list_view);
         historyAdapter = new AutoFilterListAdapter(this, mStrs);
         mListView.setAdapter(historyAdapter);
-        mListView.setOnItemClickListener(this);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
         //listview启动过滤
         mListView.setTextFilterEnabled(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this );
@@ -145,6 +152,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
         for(int i=0;i<20;i++){
             list.add("备件0000"+i+str);
+            JSONObject job = new JSONObject();
         }
         recycleAdapter.notifyDataSetChanged();
         swipeRefreshLayout.setRefreshing(false);
@@ -195,20 +203,28 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
             case TASK_SEEK_GOODS:
                 titleView.setText(R.string.thok_equipment_select);
                 findViewById(R.id.input_title).setVisibility(View.VISIBLE);
+                String seek = getIntent().getStringExtra(KEY_WORD_SEEK);
+                Log.d(tag,"seek = "+seek);
+                input_edit.setQuery(seek,false);
+
              default:
         }
     }
-
+    /**
+     * 展示列表的item点击
+     * */
     @Override
     public void onItemClick(View view, int position) {
         if(intent != null){
             intent.putExtra("item",position);
             startActivityForResult(intent,0);
         }else {
-
+            mListView.clearTextFilter();
+            historyAdapter.getFilter().filter("");
+            mListView.setVisibility(View.GONE);
             new AlertDialog.Builder(this)
                     .setTitle("确定所选吗")
-                    .setNegativeButton("确定",((dialog, which) ->{setResult(ON_ITEM_SELECTED,getIntent().putExtra(INQUIRY_RESULT_DATA,position));
+                    .setNegativeButton("确定",((dialog, which) ->{setResult(ON_ITEM_SELECTED,getIntent().putExtra(INQUIRY_RESULT_DATA,list.get(position)));
                         finish();} ))
                     .setPositiveButton("取消",(dialog, which)->{})
                     .show();
@@ -216,7 +232,9 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
 
     }
-
+    /**
+     * 展示列表的item长点击
+     * */
     @Override
     public boolean onItemLongClick(View view, int position) {
         return false;
@@ -237,24 +255,42 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     @Override
     public boolean onQueryTextChange(String newText) {
         Log.d(tag,newText);
-        if(newText!=null && !newText.isEmpty() && needHint){
+        if(newText!=null && !newText.isEmpty()){
             historyAdapter.getFilter().filter(newText);
             mListView.setVisibility(View.VISIBLE);
         }else{
-            needHint = true;
             mListView.clearTextFilter();
-            historyAdapter.getFilter().filter(newText);
+            historyAdapter.getFilter().filter("");
             mListView.setVisibility(View.GONE);
         }
         return false;
     }
 
-
+    /**
+     * 自动匹配列表的item点击
+     * */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        needHint = false;
-        CharSequence cs = (CharSequence) historyAdapter.getItem(position);
-        if(!cs.toString().contains("未发现"))
-            input_edit.setQuery((CharSequence) historyAdapter.getItem(position),false);
+        input_edit.setQuery((CharSequence) historyAdapter.getItem(position),false);
+        mListView.clearTextFilter();
+        historyAdapter.getFilter().filter("");
+        mListView.setVisibility(View.GONE);
     }
+    /**
+     * 自动匹配列表的item长点击
+     * */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if(ev.getAction() == MotionEvent.ACTION_DOWN){//把操作放在用户点击的时候
+            View v = getCurrentFocus();                 //得到当前页面的焦点,ps:有输入框的页面焦点一般会被输入框占据
+            if(isShouldHideKeyboard(v,ev)){//判断用户点击的是否是输入框以外的区域
+                hideKeyboard(v.getWindowToken());   //收起键盘
+              /*  mListView.clearTextFilter();
+                historyAdapter.getFilter().filter("");
+                mListView.setVisibility(View.GONE);*/
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 }

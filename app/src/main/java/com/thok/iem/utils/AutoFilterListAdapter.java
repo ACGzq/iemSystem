@@ -107,7 +107,7 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
             if (filterResults.count>0){
                 notifyDataSetChanged();//通知数据发生了改变
             }else if(filterResults.count == 0){
-                dataList.add((T)("未发现"+charSequence));
+                dataList.add((T)(charSequence));
                 notifyDataSetChanged();//通知数据发生了改变
             }else {
                 notifyDataSetInvalidated();//通知数据失效

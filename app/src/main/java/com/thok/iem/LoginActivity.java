@@ -32,7 +32,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.thok.iem.ui.BaseActivity;
-import com.thok.iem.ui.ForgetActivity;
+import com.thok.iem.ui.ForgetPassWordActivity;
 import com.thok.iem.ui.HomeActivity;
 import com.thok.iem.utils.SharedPreferencesUtil;
 
@@ -109,7 +109,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptLogin();
             }
         });
-        findViewById(R.id.forget).setOnClickListener((View view)-> startActivity(new Intent(LoginActivity.this,ForgetActivity.class)));
+        findViewById(R.id.forget).setOnClickListener((View view)-> startActivity(new Intent(LoginActivity.this,ForgetPassWordActivity.class)));
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 public class BaseActivity extends AppCompatActivity {
 public static ArrayList<Activity> activityArrayList = new ArrayList<>();
     public static final  String TASK_TYPE = "TASK_TYPE";
+    public static final  String KEY_WORD_SEEK = "KEY_WORD_SEEK";
     public static final  String INQUIRY_RESULT_DATA = "INQUIRY_RESULT_DATA";
     public static final String INTENT_FILTER_ACTION = "com.thok.iem.action";
     public static final int TASK_DONE = 6666;
@@ -109,7 +110,7 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
      * 获取InputMethodManager，隐藏软键盘
      * @param token
      */
-    private void hideKeyboard(IBinder token) {
+    protected void hideKeyboard(IBinder token) {
         if (token != null) {
             InputMethodManager im = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             im.hideSoftInputFromWindow(token, InputMethodManager.HIDE_NOT_ALWAYS);

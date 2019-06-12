@@ -7,13 +7,13 @@ import android.view.View;
 
 import com.thok.iem.R;
 
-public class ForgetActivity extends BaseActivity {
+public class ForgetPassWordActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forget);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationOnClickListener((View view)->ForgetActivity.this.finish());
+        toolbar.setNavigationOnClickListener((View view)->ForgetPassWordActivity.this.finish());
     }
 }
