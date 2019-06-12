@@ -15,32 +15,44 @@ import android.support.v7.widget.RecyclerView;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.model.Response;
+import com.lzy.okgo.request.base.Request;
 import com.thok.iem.R;
+import com.thok.iem.httpUtil.OkGoJsonCallback;
+import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.BaseRequest;
+import com.thok.iem.model.GoodsBean;
+import com.thok.iem.model.MaintenanceBean;
+import com.thok.iem.model.MaintenanceResponse;
+import com.thok.iem.model.SearchMaintenanceRequest;
 import com.thok.iem.utils.AutoFilterListAdapter;
 import com.thok.iem.utils.QuickAdapter;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.OnItemClickListener, SearchView.OnQueryTextListener, AdapterView.OnItemClickListener {
     private TextView titleView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private SearchView input_edit;
-    private ArrayList<String> list = new ArrayList<>();
+    private ArrayList<Object> list = new ArrayList<>();
+    private ArrayList<MaintenanceBean> maintenanceBeanArrayList = new ArrayList<>();
+    private ArrayList<GoodsBean> goodsBeanArrayList = new ArrayList<>();
+    //private ArrayList<GoodsBean> goodsBeanArrayList = new ArrayList<>();
     private QuickAdapter recycleAdapter;
     private AutoFilterListAdapter historyAdapter;
     private Intent intent;
@@ -78,11 +90,8 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         mListView = findViewById(R.id.list_view);
         historyAdapter = new AutoFilterListAdapter(this, mStrs);
         mListView.setAdapter(historyAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mListView.setOnItemClickListener((parent, view, position, id) -> {
 
-            }
         });
         //listview启动过滤
         mListView.setTextFilterEnabled(true);
@@ -92,16 +101,24 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         //设置为垂直布局，这也是默认的
         layoutManager.setOrientation(OrientationHelper. VERTICAL);
         //设置Adapter
-        recycleAdapter = new QuickAdapter<String>(list){
+        recycleAdapter = new QuickAdapter<Object>(list){
             @Override
             public int getLayoutId(int viewType) {
-                return R.layout.list_item_one_text;
+                return R.layout.list_item_with_title;
             }
 
             @Override
-            public void convert(QuickAdapter.QuickVH holder, String data, int position) {
-                holder.setText(R.id.item_text,data);
-                holder.getView(R.id.item_title);
+            public void convert(QuickAdapter.QuickVH holder, Object data, int position) {
+                if(data instanceof MaintenanceBean){
+                    holder.setText(R.id.item_text,String.format("设备编号:%s %n保养项目: %s %n保养周期: %s %n更换周期: %s %n养护人: %s %n",
+                            ((MaintenanceBean)data).getDeviceNum()+position,((MaintenanceBean)data).getProgrem(),((MaintenanceBean)data).getDays(),
+                            ((MaintenanceBean)data).getChangeDays(),((MaintenanceBean)data).getMaintenancer()));
+                    holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
+                    holder.setText(R.id.item_title,((MaintenanceBean)data).getDeviceName());
+                }else {
+                    holder.setText(R.id.item_text,"position = "+position);
+                }
+
             }
 
             @Override
@@ -148,14 +165,80 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     }
 
     private void getData(String str) {
-        list.clear();
-
+        /*list.clear();
         for(int i=0;i<20;i++){
-            list.add("备件0000"+i+str);
-            JSONObject job = new JSONObject();
+            MaintenanceBean maintenanceBean = new MaintenanceBean();
+            maintenanceBean.setChangeDays("72");
+            maintenanceBean.setDays("36");
+            maintenanceBean.setDeviceName("回旋加速喷气式阿姆斯特朗炮");
+            maintenanceBean.setMaintenancer("坂田银时");
+            maintenanceBean.setProgrem("万事屋");
+            maintenanceBean.setDeviceNum("9543");
+            list.add(maintenanceBean);
         }
         recycleAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.setRefreshing(false);*/
+        String url,jsonParamsStr;
+        switch (getIntent().getIntExtra(TASK_TYPE,0)){
+            case TASK_MAINTAIN:
+                if(TextUtils.isEmpty(str)){
+                    url = RequestURLs.URL_FIND_MAINTENANCE;
+                    jsonParamsStr = new BaseRequest("token","id").toJsonString();
+                }else{
+                    url = RequestURLs.URL_SEARCH_MAINTENANCE;
+                    SearchMaintenanceRequest searchMaintenanceRequest = new SearchMaintenanceRequest("token");
+                    Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+                    if(pattern.matcher(str).matches()){
+                        searchMaintenanceRequest.setDeviceNum(str);
+                    }else{
+                        searchMaintenanceRequest.setDeviceName(str);
+                    }
+                    jsonParamsStr = searchMaintenanceRequest.toJsonString();
+                }
+                OkGo.<MaintenanceResponse>post(url)
+                        .tag(this)
+                        .upJson(jsonParamsStr)
+                        .execute(new OkGoJsonCallback<MaintenanceResponse>() {
+                            @Override
+                            public void onErrorMessage(String str,int code) {
+                                if(!swipeRefreshLayout.isRefreshing()){
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
+                                Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onSuccess(Response<MaintenanceResponse> response) {
+                                List<MaintenanceBean> maintenanceList = response.body().getData();
+                                if(maintenanceList!=null){
+                                    list.clear();
+                                    for (MaintenanceBean maintenanceBean:maintenanceList){
+                                        list.add(maintenanceBean);
+                                    }
+                                }
+                                recycleAdapter.notifyDataSetChanged();
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+
+                            @Override
+                            public void onStart(Request<MaintenanceResponse, ? extends Request> request) {
+                                super.onStart(request);
+                                if(!swipeRefreshLayout.isRefreshing()){
+                                    swipeRefreshLayout.setRefreshing(true);
+                                }
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                super.onFinish();
+                                if(!swipeRefreshLayout.isRefreshing()){
+                                    swipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                        });
+                break;
+            default:
+        }
     }
 
     @Override
@@ -177,6 +260,11 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     }
     public void initUi(int type){
         switch (type){
+            case TASK_PATROL:
+            titleView.setText(R.string.thok_patrol);
+            intent = new Intent(this,TaskSubmitActivity.class);
+            intent.putExtra(TASK_TYPE,type);
+            break;
             case TASK_MATERIAL_APPLY:
                 titleView.setText(R.string.title_receiving_materials);
                 getData("领料单号：32323232\n" +
@@ -184,27 +272,25 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                         "申请时间：2019-05-09");
                intent = new Intent(this,GoodsInfoActivity.class);
                intent.putExtra(TASK_TYPE,type);
-                break;
-            case TASK_PATROL:
-                titleView.setText(R.string.thok_patrol);
-                intent = new Intent(this,TaskSubmitActivity.class);
-                intent.putExtra(TASK_TYPE,type);
+
                 break;
             case TASK_RPAIR_REPORT:
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
                 titleView.setText(R.string.thok_repair_task);
+
                 break;
             case TASK_MAINTAIN:
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
                 titleView.setText(R.string.thok_maintain_task);
+
                 break;
             case TASK_SEEK_GOODS:
                 titleView.setText(R.string.thok_equipment_select);
                 findViewById(R.id.input_title).setVisibility(View.VISIBLE);
                 String seek = getIntent().getStringExtra(KEY_WORD_SEEK);
-                Log.d(tag,"seek = "+seek);
+                printLog(tag,"seek = "+seek);
                 input_edit.setQuery(seek,false);
 
              default:
@@ -224,7 +310,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
             mListView.setVisibility(View.GONE);
             new AlertDialog.Builder(this)
                     .setTitle("确定所选吗")
-                    .setNegativeButton("确定",((dialog, which) ->{setResult(ON_ITEM_SELECTED,getIntent().putExtra(INQUIRY_RESULT_DATA,list.get(position)));
+                    .setNegativeButton("确定",((dialog, which) ->{setResult(ON_ITEM_SELECTED,getIntent().putExtra(INQUIRY_RESULT_DATA,list.get(position).toString()));
                         finish();} ))
                     .setPositiveButton("取消",(dialog, which)->{})
                     .show();
@@ -254,7 +340,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        Log.d(tag,newText);
+        printLog(tag,newText);
         if(newText!=null && !newText.isEmpty()){
             historyAdapter.getFilter().filter(newText);
             mListView.setVisibility(View.VISIBLE);

@@ -2,10 +2,12 @@ package com.thok.iem.ui;
 
 import android.app.Activity;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -15,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 
+import com.thok.iem.BuildConfig;
 import com.thok.iem.R;
 
 import java.util.ArrayList;
@@ -114,6 +117,11 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
         if (token != null) {
             InputMethodManager im = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             im.hideSoftInputFromWindow(token, InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+    public void printLog(String tag,String log){
+        if(BuildConfig.DEBUG){
+            Log.d(tag,log);
         }
     }
 }

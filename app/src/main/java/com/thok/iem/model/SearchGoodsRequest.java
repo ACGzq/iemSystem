@@ -1,6 +1,6 @@
 package com.thok.iem.model;
 
-public class Goods {
+public class SearchGoodsRequest extends BaseRequest {
 
     /**
      * number : 10
@@ -10,7 +10,6 @@ public class Goods {
      * specifications : 规格
      * status : 0
      * supplier : 天海供应商
-     * token : 1
      * unit : 台
      */
 
@@ -21,7 +20,6 @@ public class Goods {
     private String specifications;
     private String status;
     private String supplier;
-    private String token;
     private String unit;
 
     public String getNumber() {
@@ -78,14 +76,6 @@ public class Goods {
 
     public void setSupplier(String supplier) {
         this.supplier = supplier;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getUnit() {

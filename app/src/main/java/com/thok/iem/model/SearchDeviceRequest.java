@@ -1,6 +1,6 @@
 package com.thok.iem.model;
 
-public class SearchDeviceRequestBean extends BaseRequest {
+public class SearchDeviceRequest extends BaseRequest {
 
     /**
      * deviceName : 堆垛机

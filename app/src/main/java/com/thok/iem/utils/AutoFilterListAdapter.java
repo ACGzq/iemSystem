@@ -1,7 +1,6 @@
 package com.thok.iem.utils;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,10 +25,10 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
         this.dataList = dataList;
         backDataList = dataList;
     }
-    public AutoFilterListAdapter(Context context , T[] strs) {
+    public AutoFilterListAdapter(Context context , T[] objs) {
         this.context = context;
         this.dataList = new ArrayList<T>();
-        for(T s:strs){
+        for(T s:objs){
             dataList.add(s);
         }
         backDataList = dataList;
@@ -55,7 +54,7 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
         ViewHolder holder = null;
 
         if (convertView==null){
-            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_one_text,null);
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_with_title,null);
             holder = new ViewHolder();
             holder.value = convertView.findViewById(R.id.item_text);
             convertView.setTag(holder);

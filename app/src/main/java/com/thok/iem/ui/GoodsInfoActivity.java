@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.thok.iem.R;
-import com.thok.iem.model.Goods;
+import com.thok.iem.model.GoodsBean;
 import com.thok.iem.utils.QuickAdapter;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
     private View info_detailed;
     private boolean showDetailed;
     private QuickAdapter quickAdapter;
-    private List<Goods> list = new ArrayList<>();
+    private List<GoodsBean> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +36,14 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
         info_detailed = findViewById(R.id.info_detailed);
         detailed_list_view = findViewById(R.id.detailed_list_view);
         detailed_list_view.setLayoutManager(new LinearLayoutManager(this));
-        quickAdapter = new QuickAdapter<Goods>(list) {
+        quickAdapter = new QuickAdapter<GoodsBean>(list) {
             @Override
             public int getLayoutId(int viewType) {
                 return R.layout.list_item_edging;
             }
 
             @Override
-            public void convert(QuickVH holder, Goods data, int position) {
+            public void convert(QuickVH holder, GoodsBean data, int position) {
                 holder.setText(R.id.item1,position+1+"");
                 holder.setText(R.id.item2,data.getSpareName());
                 holder.setText(R.id.item3,data.getSpecifications());
@@ -84,11 +84,11 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
     private void getData() {
         list.clear();
         for(int i=0;i<10;i++){
-            Goods goods = new Goods();
-            goods.setNumber("2");
-            goods.setSpareName("神奇四维空间兜");
-            goods.setSpecifications("白色");
-            list.add(goods);
+            GoodsBean goodsBean = new GoodsBean();
+            goodsBean.setNumber("2");
+            goodsBean.setSpareName("神奇四维空间兜");
+            goodsBean.setSpecifications("白色");
+            list.add(goodsBean);
         }
        quickAdapter.notifyDataSetChanged();
     }

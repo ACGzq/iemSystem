@@ -1,5 +1,7 @@
 package com.thok.iem.model;
 
+import java.util.List;
+
 public class GoodsResponse extends BaseResponse {
 
     /**
@@ -10,17 +12,17 @@ public class GoodsResponse extends BaseResponse {
      * totalCount : 1
      */
 
-    private Goods data;
+    private List<GoodsBean> data;
     private int pageSize;
     private String pageNo;
     private int totalPage;
     private int totalCount;
 
-    public Goods getData() {
+    public List<GoodsBean> getData() {
         return data;
     }
 
-    public void setData(Goods data) {
+    public void setData(List<GoodsBean> data) {
         this.data = data;
     }
 

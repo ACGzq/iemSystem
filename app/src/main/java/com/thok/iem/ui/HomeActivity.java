@@ -47,7 +47,7 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
                     switchFragment(homeFragment);
                     return true;
                 case R.id.navigation_information:
-                    Log.d("ItemSelected","navigation_information");
+                    printLog("ItemSelected","navigation_information");
                     //startActivity(new Intent(HomeActivity.this,EquipmentInfoActivity.class));
                     if(equipentInfoFragment == null){
                         equipentInfoFragment = EquipmentInfoFragment.newInstance(1);
@@ -84,7 +84,7 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
         myFragment = MyFragment.newInstance("","");
         equipentInfoFragment = EquipmentInfoFragment.newInstance(1);
         if (savedInstanceState == null) {
-            Log.d("home_frame_layout","home_frame_layout");
+            printLog("home_frame_layout","home_frame_layout");
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.home_frame_layout, homeFragment).commit();
             currentFragment = homeFragment;
@@ -152,27 +152,10 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d("iem_homeActivity","toString = "+event.toString()+"_getCharacters = "+event.getCharacters());
+        printLog("iem_homeActivity","toString = "+event.toString()+"_getCharacters = "+event.getCharacters());
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-       // getMenuInflater().inflate(R.menu.action_menu_submit, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-       /* switch (item.getItemId()) {
-            case R.id.action_my:
-                Toast.makeText(this,item.getTitle(),Toast.LENGTH_LONG).show();
-                startActivity(new Intent(this,MyActivity.class));
-                break;
-                default:
-        }*/
-        return super.onOptionsItemSelected(item);
-    }
     public void hideAllFragement(){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if(homeFragment != null){
@@ -191,20 +174,20 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.d("iem_homeActivity","intent="+intent.toString()+"_="+intent.getStringExtra("com.symbol.datawedge.data_string"));
+        printLog("iem_homeActivity","intent="+intent.toString()+"_="+intent.getStringExtra("com.symbol.datawedge.data_string"));
         super.onNewIntent(intent);
     }
 
     private void switchFragment(Fragment targetFragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if (!targetFragment.isAdded()) {
-            Log.d("switchFragment",targetFragment.getClass().getName()+"isAdded");
+            printLog("switchFragment",targetFragment.getClass().getName()+"isAdded");
             transaction
                     .hide(currentFragment)
                     .add(R.id.home_frame_layout, targetFragment)
                     .commit();
         }else if(currentFragment != targetFragment){
-            Log.d("switchFragment",targetFragment.getClass().getName()+"show");
+            printLog("switchFragment",targetFragment.getClass().getName()+"show");
             transaction
                     .hide(currentFragment)
                     .show(targetFragment)
@@ -233,7 +216,7 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
                 //  Received a barcode scan
                 try {
                    // displayScanResult(intent, "via Broadcast");
-                    Log.d("iem_homeActivity","decodedData =" + intent.getStringExtra("com.symbol.datawedge.data_string"));
+                    printLog("iem_homeActivity","decodedData =" + intent.getStringExtra("com.symbol.datawedge.data_string"));
                     ((EquipmentInfoFragment)equipentInfoFragment).updataUi(intent.getStringExtra("com.symbol.datawedge.data_string"));
                 } catch (Exception e) {
                     //  Catch if the UI does not exist when we receive the broadcast... this is not designed to be a production app

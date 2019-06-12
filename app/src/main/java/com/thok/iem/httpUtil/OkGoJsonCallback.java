@@ -61,18 +61,20 @@ public abstract class OkGoJsonCallback<T extends BaseResponse> extends AbsCallba
         Throwable exception = response.getException();
         if(exception != null) exception.printStackTrace();
         if(exception instanceof UnknownHostException){
-            onErrorMessage("网络连接失败");
+            onErrorMessage("网络连接失败",ErrCode.UnknownHostErr);
         }else if(exception instanceof SocketTimeoutException){
-            onErrorMessage("网络请求超时");
+            onErrorMessage("网络请求超时",ErrCode.NetworkTimeOut);
         }else if(exception instanceof HttpException){
-            onErrorMessage("服务端错误");
+            onErrorMessage("服务端错误",ErrCode.NetworkErr);
         }else if(exception instanceof IllegalStateException){
-            onErrorMessage(exception.getMessage());
+            onErrorMessage(exception.getMessage(),ErrCode.IllegalStateErr);
         }else if(exception instanceof JsonIOException){
-            onErrorMessage("json 数据读取失败");
+            onErrorMessage("json 数据读取失败",ErrCode.JsonIOErr);
         }else if(exception instanceof JsonSyntaxException){
-            onErrorMessage("Json 数据解析失败");
+            onErrorMessage("Json 数据解析失败",ErrCode.JsonSyntaxErr);
+        }else{
+            onErrorMessage("unKnow Err",ErrCode.UnknowErr);
         }
     }
-    abstract public void onErrorMessage(String str);
+    abstract public void onErrorMessage(String str,int code);
 }

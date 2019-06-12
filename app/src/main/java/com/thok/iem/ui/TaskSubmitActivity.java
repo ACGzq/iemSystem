@@ -125,7 +125,7 @@ public class TaskSubmitActivity extends BaseActivity implements View.OnClickList
                 new AlertDialog.Builder(this);
         inputDialog.setTitle("请输入").setView(editText);
         inputDialog.setPositiveButton("确定",
-                (dialog, which) -> view.setText(editText.getText())).setNegativeButton("取消",((dialog, which) -> Log.d(tag,"COLSE"))).show();
+                (dialog, which) -> view.setText(editText.getText())).setNegativeButton("取消",((dialog, which) -> printLog(tag,"COLSE"))).show();
     }
     public void initUI(int type){
         dataPicker = new DateTimePicker(this, DateTimePicker.HOUR_24);
@@ -164,7 +164,7 @@ public class TaskSubmitActivity extends BaseActivity implements View.OnClickList
                 status_title.setText("操作类型");
                 time_title.setText("操作时间");
                 time_title2.setText("下次操作时间");
-                input_title.setText("操作类型");
+                input_title.setText("操作内容");
                 input_layout2.setVisibility(View.GONE);
                 input_layout3.setVisibility(View.GONE);
                 input_layout4.setVisibility(View.GONE);

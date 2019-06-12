@@ -9,6 +9,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +26,10 @@ import com.thok.iem.R;
 import com.thok.iem.httpUtil.ImageRequest;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
 import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.BaseRequest;
 import com.thok.iem.model.DeviceBean;
 import com.thok.iem.model.DevicesResponse;
-import com.thok.iem.model.SearchDeviceRequestBean;
+import com.thok.iem.model.SearchDeviceRequest;
 import com.thok.iem.utils.QuickAdapter;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class EquipmentInfoFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
+public class EquipmentInfoFragment extends BaseFragment implements View.OnClickListener, SearchView.OnQueryTextListener {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -48,6 +50,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
     QuickAdapter adapter;
     Context context;
     private OnListFragmentInteractionListener mListener;
+    private RecyclerView recyclerView;
     boolean flag;
     private SearchView input_edit;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -92,7 +95,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
         swipeRefreshLayout = rootView.findViewById(R.id.info_list_swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(() -> search(input_edit.getQuery().toString()));
         context = rootView.getContext();
-        RecyclerView recyclerView = rootView.findViewById(R.id.list);
+        recyclerView = rootView.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new QuickAdapter<DeviceBean>(list) {
             @Override
@@ -118,7 +121,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
             @Override
             public void onItemClick(View view, int position) {
                 Toast.makeText(context,"第"+position+"项",Toast.LENGTH_SHORT).show();
-                Log.d("iem_EqInfoFragment","position="+position);
+                printLog("iem_EqInfoFragment","position="+position);
             }
 
             @Override
@@ -152,12 +155,12 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        Log.d("iem_EqInfoFragment","id="+v.getId()+
+        printLog("iem_EqInfoFragment","id="+v.getId()+
         "R.id.search_button="+R.id.search_bt);
         switch (v.getId()){
             case R.id.search_go_btn:
             //case R.id.screen_image:
-                Log.d("iem_EqInfoFragment","screen_image");
+                printLog("iem_EqInfoFragment","screen_image");
                 // define action and data strings
                 startSoftScan();
                 break;
@@ -170,19 +173,30 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
 
     public void search(String keyWord){
         list.clear();
-        Log.d("iem_EqInfoFragment","search");
-        SearchDeviceRequestBean sdrBean = new SearchDeviceRequestBean();
-        sdrBean.setDeviceName("堆垛机");
-        sdrBean.setDeviceNum(keyWord);
-        sdrBean.setToken("1");
-        Log.d("iem_EqInfoFragment",sdrBean.toJsonString());
-        OkGo.<DevicesResponse>post(RequestURLs.URL_SEARCH_DEVICE)
+        printLog("iem_EqInfoFragment","search");
+        String jsonParamsStr;
+        String url;
+        if(TextUtils.isEmpty(keyWord)){
+            BaseRequest baseRequest = new BaseRequest();
+            baseRequest.setId("10");
+            baseRequest.setToken("1");
+            jsonParamsStr = baseRequest.toJsonString();
+            url = RequestURLs.URL_FIND_DEVICE;
+        }else{
+            SearchDeviceRequest sdrBean = new SearchDeviceRequest();
+            sdrBean.setDeviceName("堆垛机");
+            sdrBean.setDeviceNum(keyWord);
+            sdrBean.setToken("1");
+            jsonParamsStr = sdrBean.toJsonString();
+            url = RequestURLs.URL_SEARCH_DEVICE;
+        }
+        OkGo.<DevicesResponse>post(url)
                 .tag(this)
-                .upJson(sdrBean.toJsonString())
+                .upJson(jsonParamsStr)
                 .execute(new OkGoJsonCallback<DevicesResponse>() {
                     @Override
                     public void onStart(Request<DevicesResponse, ? extends Request> request) {
-                        Log.d("iem_EqInfoFragment", "onStart");
+                        printLog("iem_EqInfoFragment", "onStart");
                         if(!swipeRefreshLayout.isRefreshing()){
                             swipeRefreshLayout.setRefreshing(true);
                         }
@@ -191,7 +205,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
                     @Override
                     public void onSuccess(Response<DevicesResponse> response) {
                         DevicesResponse devices = response.body();
-                        Log.d("iem_EqInfoFragment", "onSuccess: "+response.body());
+                        printLog("iem_EqInfoFragment", "onSuccess: "+response.body());
                         if(devices!=null){
                             List<DeviceBean> deviceList = devices.getData();
                             list.clear();
@@ -204,11 +218,11 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
 
                     @Override
                     public void onCacheSuccess(Response<DevicesResponse> response) {
-                        Log.d("iem_EqInfoFragment", "onSuccess: "+response.body());
+                        printLog("iem_EqInfoFragment", "onSuccess: "+response.body());
                     }
 
                     @Override
-                    public void onErrorMessage(String str) {
+                    public void onErrorMessage(String str,int code) {
                         if (swipeRefreshLayout.isRefreshing()){
                             swipeRefreshLayout.setRefreshing(false);
                         }
@@ -217,7 +231,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
 
                     @Override
                     public void onFinish() {
-                        Log.d("iem_EqInfoFragment", "onFinish");
+                        printLog("iem_EqInfoFragment", "onFinish");
                         if (swipeRefreshLayout.isRefreshing()){
                             swipeRefreshLayout.setRefreshing(false);
                         }
@@ -226,7 +240,7 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
                    /* @Override
                     public DevicesResponse convertResponse(okhttp3.Response response) throws Throwable {
                         String jsonObjString = response.body().string();
-                        Log.d("iem_EqInfoFragment", "convertResponse:"+ jsonObjString);
+                        printLog("iem_EqInfoFragment", "convertResponse:"+ jsonObjString);
                        return super.convertResponse(response);
                     }*/
         });
@@ -241,14 +255,14 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
         i.setAction(softScanTrigger);
         // add additional info
         i.putExtra(extraData, flag?"START_SCANNING":"TOGGLE_SCANNING");
-        Log.d(getTag(),"startSoftScan");
+        printLog(getTag(),"startSoftScan");
         getActivity().sendBroadcast(i);
 
     }
 
     @Override
     public boolean onQueryTextSubmit(String s) {
-        Log.d("iem_EqInfoFragment",s);
+        printLog("iem_EqInfoFragment",s);
         search(s);
         return false;
     }
@@ -277,4 +291,5 @@ public class EquipmentInfoFragment extends Fragment implements View.OnClickListe
     public void updataUi(String str){
         input_edit.setQuery(str,true);
     }
+    
 }

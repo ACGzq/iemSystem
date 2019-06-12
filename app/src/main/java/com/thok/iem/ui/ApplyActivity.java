@@ -50,7 +50,9 @@ public class ApplyActivity extends BaseActivity implements View.OnClickListener 
                     holder.setText(R.id.item4,data.getAmount()+"");
                     View del_btn = holder.getView(R.id.del_btn);
                     del_btn.setOnClickListener((view)-> {componentList.remove(position);
-                        componentAdapter.notifyDataSetChanged();});
+                    printLog(tag,"OnClick_position="+position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position,getItemCount());});
                     del_btn.setVisibility(delMode?View.VISIBLE:View.GONE);
             }
         };
@@ -87,17 +89,20 @@ public class ApplyActivity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        Log.d(Tag,"resultCode="+resultCode);
+        printLog(Tag,"resultCode="+resultCode);
         if(resultCode == TASK_DONE){
             Component component = new Component();
             component.setEqiopmentName(data.getStringExtra(Component.KEY_WORD_COMPONENT_NAME));
             component.setModelType(data.getStringExtra(Component.KEY_WORD_MODEL_TYPE));
             component.setAmount(data.getIntExtra(Component.KEY_WORD_AMOUNT,0));
             componentList.add(component);
+            componentAdapter.notifyItemRangeChanged(componentList.size()-1,1);
+        }
+
+        if(delMode){
+            delMode = false;
             componentAdapter.notifyDataSetChanged();
         }
-        delMode = false;
-        componentAdapter.notifyDataSetChanged();
         super.onActivityResult(requestCode, resultCode, data);
     }
 }

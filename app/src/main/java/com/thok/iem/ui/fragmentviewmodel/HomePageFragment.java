@@ -17,9 +17,8 @@ import com.thok.iem.ui.BaseActivity;
 import com.thok.iem.ui.TaskInquiryActivity;
 import com.thok.iem.ui.TaskSubmitActivity;
 
-public class HomePageFragment extends Fragment implements View.OnClickListener {
+public class HomePageFragment extends BaseFragment implements View.OnClickListener {
 
-    private HomePageViewModel mViewModel;
     View homeView;
     Activity homeActivity;
     public static HomePageFragment newInstance() {
@@ -43,7 +42,6 @@ public class HomePageFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(HomePageViewModel.class);
         // TODO: Use the ViewModel
     }
 

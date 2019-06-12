@@ -33,7 +33,7 @@
         android:layout_height="wrap_content">
     <EditText
         android:hint="@string/thok_old_pass"
-        android:id="@+id/old_pass"
+        android:id="@+id/origin_pass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
@@ -59,7 +59,7 @@
         android:layout_height="wrap_content">
         <EditText
             android:hint="@string/confirm_the_new_password_again"
-            android:id="@+id/new_pass_again"
+            android:id="@+id/identification_new_pass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
@@ -70,6 +70,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
     <Button
+        android:id="@+id/submit_change"
         android:layout_gravity="center"
         android:layout_width="140dp"
         android:layout_height="45dp"

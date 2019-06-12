@@ -27,7 +27,8 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".LoginActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,24 +39,30 @@
         <activity
             android:name=".ui.HomeActivity"
             android:label="@string/title_activity_home"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="com.thok.iem.action" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.MyActivity" />
-        <activity android:name=".ui.AlterPassActivity" />
-        <activity android:name=".ui.TaskSubmitActivity" />
-        <activity android:name=".ui.BaseActivity" />
+        <activity android:name=".ui.AlterPassActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.TaskSubmitActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.BaseActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".ui.TaskInquiryActivity"
-                  android:windowSoftInputMode="adjustPan"/>
-
-        <activity android:name=".ui.ApplyActivity" />
-        <activity android:name=".ui.GoodsInfoActivity" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"/>
+        <activity android:name=".ui.ApplyActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.GoodsInfoActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".ui.AddGoodsActivity"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

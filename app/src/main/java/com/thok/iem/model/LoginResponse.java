@@ -1,13 +1,13 @@
 package com.thok.iem.model;
 
 public class LoginResponse extends BaseResponse{
-    private Goods data;
+    private UserBean data;
 
-    public Goods getData() {
+    public UserBean getData() {
         return data;
     }
 
-    public void setData(Goods data) {
+    public void setData(UserBean data) {
         this.data = data;
     }
 }
