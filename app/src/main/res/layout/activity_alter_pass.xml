@@ -22,7 +22,7 @@
             android:text="@string/thok_alter_password"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_white"
             android:layout_gravity="center"/>
     </android.support.v7.widget.Toolbar>
     <android.support.design.widget.TextInputLayout

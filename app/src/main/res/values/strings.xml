@@ -25,10 +25,10 @@
     <string name="thok_my">我的</string>
     <string name="thok_logout">退出</string>
     <string name="thok_userInfo_text">个人信息</string>
-    <string name="thok_account_text">账号</string>
-    <string name="thok_username_text">姓名</string>
-    <string name="thok_role_text">角色：</string>
-    <string name="thok_create_time">创建时间</string>
+    <string name="thok_account_text">账号:</string>
+    <string name="thok_username_text">姓名:</string>
+    <string name="thok_role_text">角色:</string>
+    <string name="thok_create_time">创建时间:</string>
     <string name="thok_alter_password">修改密码</string>
     <string name="thok_old_pass">旧密码</string>
     <string name="thok_new_pass">新密码</string>

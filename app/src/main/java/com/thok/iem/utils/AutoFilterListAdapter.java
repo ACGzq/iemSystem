@@ -113,5 +113,9 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
             }
         }
     }
-
+    public void  destiry(){
+        context = null;
+        dataList = null;
+        backDataList = null;
+    }
 }

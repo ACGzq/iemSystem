@@ -3,8 +3,10 @@ package com.thok.iem;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -15,12 +17,12 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,15 +33,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.model.Response;
+import com.thok.iem.httpUtil.ErrCode;
+import com.thok.iem.httpUtil.OkGoJsonCallback;
+import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.LoginRequest;
+import com.thok.iem.model.LoginResponse;
+import com.thok.iem.model.UserBean;
 import com.thok.iem.ui.BaseActivity;
 import com.thok.iem.ui.ForgetPassWordActivity;
 import com.thok.iem.ui.HomeActivity;
+import com.thok.iem.utils.DataBaseHelp;
 import com.thok.iem.utils.SharedPreferencesUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static com.thok.iem.ui.BaseActivity.LAST_LOGIN_USER_ID;
 
 /**
  * A login screen that offers login via email/password.
@@ -61,7 +74,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mUserAccount;
@@ -84,34 +96,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         // Set up the login form.
 
-        mUserAccount = (AutoCompleteTextView) findViewById(R.id.user_name);
+        mUserAccount = findViewById(R.id.user_name);
         populateAutoComplete();
         if(SharedPreferencesUtil.getInstance(getApplicationContext()).getBoolean(KEY_FIRSTSTART,true)){
 
         }
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-
-        Button mSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        mPasswordView = findViewById(R.id.password);
+        mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
+            if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
                 attemptLogin();
+                return true;
             }
+            return false;
         });
+
+
+        Button mSignInButton = findViewById(R.id.email_sign_in_button);
+        mSignInButton.setOnClickListener(view -> attemptLogin());
         findViewById(R.id.forget).setOnClickListener((View view)-> startActivity(new Intent(LoginActivity.this,ForgetPassWordActivity.class)));
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        String userID = SharedPreferencesUtil.getInstance(LoginActivity.this).getString(LAST_LOGIN_USER_ID);
+        if(!TextUtils.isEmpty(userID)){
+            DataBaseHelp dbHelp = new DataBaseHelp(LoginActivity.this,UserBean.class);
+            SQLiteDatabase readable = dbHelp.getReadableDatabase();
+            Cursor cursor = readable.rawQuery("select * from UserBean where id=?",new String[]{userID});
+            if(cursor.moveToFirst()){
+                mUserAccount.setText(cursor.getString(cursor.getColumnIndex("userName")));
+                mPasswordView.setText(cursor.getString(cursor.getColumnIndex("password")));
+            }
+        }
     }
     @Override
     protected void onStart() {
@@ -135,13 +149,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
             Snackbar.make(mUserAccount, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
+                    .setAction(android.R.string.ok, v -> requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS));
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -175,9 +183,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mUserAccount.setError(null);
@@ -216,8 +221,55 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(account, password);
-            mAuthTask.execute((Void) null);
+            LoginRequest loginRequest = new LoginRequest();
+            loginRequest.setUserName(account);
+            loginRequest.setPassWord(password);
+            OkGo.<LoginResponse>post(RequestURLs.URL_LOGIN)
+                    .tag(this)
+                    .upJson(new Gson().toJson(loginRequest))
+            .execute(new OkGoJsonCallback<LoginResponse>() {
+                @Override
+                public void onErrorMessage(String str, int code) {
+                    onPostExecute(false,str);
+                }
+
+                @Override
+                public void onSuccess(Response<LoginResponse> response) {
+                    UserBean userBean = response.body().getData();
+                    userBean.setPassword(password);
+                    ThokApplication.requestToken = userBean.getToken();
+                    DataBaseHelp dbHelp = new DataBaseHelp(LoginActivity.this,UserBean.class);
+                    SQLiteDatabase readable = dbHelp.getReadableDatabase();
+                    Cursor cursor = readable.rawQuery("select * from UserBean where id=?",new String[]{userBean.getId()});
+                    SQLiteDatabase dataBase = dbHelp.getWritableDatabase();
+                    if(cursor.getCount()<1){
+                        ContentValues values = new ContentValues();
+                        values.put("id", userBean.getId());
+                        values.put("token", userBean.getToken());
+                        values.put("userName", userBean.getUserName());
+                        values.put("realName", userBean.getRealName());
+                        values.put("createTime", userBean.getCreateTime());
+                        values.put("password", userBean.getPassword());
+                        values.put("userRole", userBean.getUserRole());
+                        values.put("remark", userBean.getRemark());
+                        dataBase.insert(UserBean.class.getSimpleName(), null, values);
+                    }else{
+                        //dataBase.update();
+                    }
+                    SharedPreferencesUtil.getInstance(LoginActivity.this).setString(LAST_LOGIN_USER_ID,userBean.getId());
+                    onPostExecute(true,"");
+                }
+            });
+        }
+    }
+    protected void onPostExecute(Boolean success,String msg) {
+        showProgress(false);
+        if (success) {
+            startActivityForResult(new Intent(LoginActivity.this,HomeActivity.class),0);
+            //finish();
+        } else {
+            mPasswordView.setError(msg);
+            mPasswordView.requestFocus();
         }
     }
 
@@ -321,64 +373,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-           /* for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }*/
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                startActivityForResult(new Intent(LoginActivity.this,HomeActivity.class),0);
-                //finish();
-
-            } else {
-                mPasswordView.setError(getString(R.string.thok_error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
 

@@ -15,9 +15,9 @@ import android.support.v7.widget.RecyclerView;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-
 import android.text.TextUtils;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,15 +71,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
         titleView = findViewById(R.id.inquiry_title);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(()->{Toast.makeText(this,"下来刷新",Toast.LENGTH_SHORT).show();
-        getData("匡扶汉室是倒车文化的一部分。\n" +
-                "倒车文化反映到欧陆就是意大利再造罗马帝国/希腊复兴东罗马（他将如闪电般归来）\n" +
-                "/德意志再造帝国（第三帝国）\n" +
-                "/英格兰收回英联邦诸国一方面，对于过去的美好岁月，人都是怀旧的。\n" +
-                "作者：他化自在-鸠格米西\n" +
-                "链接：https://www.zhihu.com/question/326410259/answer/698447314\n" +
-                "来源：知乎\n" +
-                "著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。");});
+        swipeRefreshLayout.setOnRefreshListener(()->getData(input_edit.getQuery().toString()));
         recyclerView = findViewById(R.id.recycler_view);
         findViewById(R.id.inquiry_button).setOnClickListener((view)->onQueryTextSubmit(input_edit.getQuery().toString()));
         input_edit = findViewById(R.id.input_edit);
@@ -90,9 +82,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         mListView = findViewById(R.id.list_view);
         historyAdapter = new AutoFilterListAdapter(this, mStrs);
         mListView.setAdapter(historyAdapter);
-        mListView.setOnItemClickListener((parent, view, position, id) -> {
-
-        });
+        mListView.setOnItemClickListener(this);
         //listview启动过滤
         mListView.setTextFilterEnabled(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this );
@@ -164,24 +154,24 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
     }
 
+    @Override
+    protected void onDestroy() {
+        historyAdapter.destiry();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        input_edit.clearFocus();
+        super.onResume();
+    }
+
     private void getData(String str) {
-        /*list.clear();
-        for(int i=0;i<20;i++){
-            MaintenanceBean maintenanceBean = new MaintenanceBean();
-            maintenanceBean.setChangeDays("72");
-            maintenanceBean.setDays("36");
-            maintenanceBean.setDeviceName("回旋加速喷气式阿姆斯特朗炮");
-            maintenanceBean.setMaintenancer("坂田银时");
-            maintenanceBean.setProgrem("万事屋");
-            maintenanceBean.setDeviceNum("9543");
-            list.add(maintenanceBean);
-        }
-        recycleAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);*/
         String url,jsonParamsStr;
         switch (getIntent().getIntExtra(TASK_TYPE,0)){
             case TASK_MAINTAIN:
                 if(TextUtils.isEmpty(str)){
+                    Toast.makeText(this,"未检测搜索内容，启用默认搜索",Toast.LENGTH_SHORT).show();
                     url = RequestURLs.URL_FIND_MAINTENANCE;
                     jsonParamsStr = new BaseRequest("token","id").toJsonString();
                 }else{
@@ -201,7 +191,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                         .execute(new OkGoJsonCallback<MaintenanceResponse>() {
                             @Override
                             public void onErrorMessage(String str,int code) {
-                                if(!swipeRefreshLayout.isRefreshing()){
+                                if(swipeRefreshLayout.isRefreshing()){
                                     swipeRefreshLayout.setRefreshing(false);
                                 }
                                 Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
@@ -217,7 +207,8 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                                     }
                                 }
                                 recycleAdapter.notifyDataSetChanged();
-                                swipeRefreshLayout.setRefreshing(false);
+                                if(swipeRefreshLayout.isRefreshing())
+                                    swipeRefreshLayout.setRefreshing(false);
                             }
 
                             @Override
@@ -238,6 +229,19 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                         });
                 break;
             default:
+                list.clear();
+                for(int i=0;i<20;i++){
+                    MaintenanceBean maintenanceBean = new MaintenanceBean();
+                    maintenanceBean.setChangeDays("72");
+                    maintenanceBean.setDays("36");
+                    maintenanceBean.setDeviceName("回旋加速喷气式阿姆斯特朗炮");
+                    maintenanceBean.setMaintenancer("坂田银时");
+                    maintenanceBean.setProgrem("万事屋");
+                    maintenanceBean.setDeviceNum("9543");
+                    list.add(maintenanceBean);
+        }
+        recycleAdapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -252,8 +256,9 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_menu_submit, menu);
         if(getIntent().getIntExtra(TASK_TYPE,0) == TASK_MATERIAL_APPLY){
-            getMenuInflater().inflate(R.menu.action_menu_submit, menu);
             menu.getItem(0).setTitle("申请");
         }
        return super.onCreateOptionsMenu(menu);
@@ -330,11 +335,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
      **/
     @Override
     public boolean onQueryTextSubmit(String s) {
-        if(s == null || s.isEmpty()){
-            Toast.makeText(this,"请输入查找内容",Toast.LENGTH_SHORT).show();
-        }else{
-            Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
-        }
+        getData(s);
         return false;
     }
 
@@ -360,6 +361,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         input_edit.setQuery((CharSequence) historyAdapter.getItem(position),false);
         mListView.clearTextFilter();
         historyAdapter.getFilter().filter("");
+        printLog(tag,"onItemClick");
         mListView.setVisibility(View.GONE);
     }
     /**

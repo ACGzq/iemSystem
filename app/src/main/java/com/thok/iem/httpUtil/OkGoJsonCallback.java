@@ -65,7 +65,7 @@ public abstract class OkGoJsonCallback<T extends BaseResponse> extends AbsCallba
         }else if(exception instanceof SocketTimeoutException){
             onErrorMessage("网络请求超时",ErrCode.NetworkTimeOut);
         }else if(exception instanceof HttpException){
-            onErrorMessage("服务端错误",ErrCode.NetworkErr);
+            onErrorMessage("服务器异常",ErrCode.NetworkErr);
         }else if(exception instanceof IllegalStateException){
             onErrorMessage(exception.getMessage(),ErrCode.IllegalStateErr);
         }else if(exception instanceof JsonIOException){

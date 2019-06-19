@@ -20,7 +20,7 @@
             android:layout_gravity="center"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/thok_equipment_repair_request"/>
@@ -32,91 +32,73 @@
         <LinearLayout
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <LinearLayout
+                android:padding="5dp"
                 android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@drawable/bottom_line_shape"
+                android:background="@color/white"
                 >
                 <LinearLayout
+                    android:id="@+id/search_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:gravity="left"
                     android:focusable="true"
                     android:focusableInTouchMode="true">
                     <TextView
+                        android:layout_gravity="center"
                         android:id="@+id/equipment_title"
-                        android:textSize="18sp"
-                        android:textColor="@color/black"
+                        android:textSize="17sp"
+                        android:textColor="@color/text_color_black"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:text="@string/thok_equipment_select"/>
                     <EditText
                         android:id="@+id/equipment_edit"
                         android:layout_weight="1"
                         android:inputType="text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:background="@drawable/bottom_line_shape"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent" />
 
                     <ImageView
+                        android:layout_marginRight="3dp"
                         android:id="@+id/equipment_scan"
-                        android:layout_marginRight="15dp"
                         android:layout_gravity="center"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/ic_dashboard_black_24dp" />
+                        app:srcCompat="@drawable/saoma" />
                 </LinearLayout>
                 <TextView
                     android:layout_marginBottom="10dp"
                     android:id="@+id/equipment_info"
                     android:text="@string/thok_equipment_no"
+                    android:textColor="@color/text_color_black"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
-               <!-- <TextView
-                    android:layout_marginBottom="10dp"
-                    android:id="@+id/equipment_name"
-                    android:text="@string/thok_equipment_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_marginBottom="10dp"
-                    android:id="@+id/equipment_model"
-                    android:text="@string/thok_equipment_model"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_marginBottom="10dp"
-                    android:id="@+id/equipment_position"
-                    android:text="@string/thok_equipment_position"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_marginBottom="10dp"
-                    android:id="@+id/malfunction_cause"
-                    android:text="@string/thok_malfunction_cause"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_marginBottom="10dp"
-                    android:id="@+id/repair_detail"
-                    android:text="@string/thok_repair_detail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />-->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+/>
             </LinearLayout>
             <LinearLayout
+                android:layout_marginTop="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray"/>
+            <LinearLayout
+                android:background="@color/white"
                 android:orientation="vertical"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
+                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
@@ -128,11 +110,13 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:textColor="@color/text_color_black"
                         android:text="设备状态"/>
 
                     <LinearLayout
+
                         android:id="@+id/select_icon"
-                        android:layout_weight="4"
+                        android:layout_weight="3"
                         android:background="@drawable/text_bg"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -146,7 +130,7 @@
                             android:layout_gravity="center"
                             android:layout_marginLeft="10dp"
                             android:gravity="center_vertical"
-                            android:text="停机" />
+                            android:text="点击图标以设置" />
 
                         <ImageView
                             android:layout_width="wrap_content"
@@ -156,6 +140,7 @@
                     </LinearLayout>
                 </LinearLayout>
                 <LinearLayout
+                    android:layout_margin="10dp"
                     android:id="@+id/repair_time"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
@@ -169,11 +154,12 @@
                         android:layout_gravity="center_vertical"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:textColor="@color/text_color_black"
                         android:text="维修时间"/>
 
                     <LinearLayout
                         android:id="@+id/time_button"
-                        android:layout_weight="4"
+                        android:layout_weight="3"
                         android:background="@drawable/text_bg"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -187,7 +173,7 @@
                             android:layout_gravity="center"
                             android:layout_marginLeft="10dp"
                             android:gravity="center_vertical"
-                            android:text="" />
+                            android:text="点击图标以设置" />
 
                         <ImageView
                             android:layout_width="wrap_content"
@@ -197,6 +183,7 @@
                 </LinearLayout>
             </LinearLayout>
                 <LinearLayout
+                    android:layout_margin="10dp"
                     android:id="@+id/request_time"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
@@ -210,11 +197,12 @@
                         android:layout_gravity="center_vertical"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="时间"/>
+                        android:textColor="@color/text_color_black"
+                        android:text="报修时间"/>
 
                     <LinearLayout
                         android:id="@+id/time_button2"
-                        android:layout_weight="4"
+                        android:layout_weight="3"
                         android:background="@drawable/text_bg"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -228,7 +216,7 @@
                             android:layout_gravity="center"
                             android:layout_marginLeft="10dp"
                             android:gravity="center_vertical"
-                            android:text="" />
+                            android:text="点击图标以设置" />
 
                         <ImageView
                             android:layout_width="wrap_content"
@@ -238,6 +226,7 @@
                     </LinearLayout>
                 </LinearLayout>
             <LinearLayout
+                android:layout_margin="10dp"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -250,11 +239,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_gravity="center"
+                    android:textColor="@color/text_color_black"
                     android:text="输入项"/>
                 <TextView
                     android:id="@+id/input_text1"
                     android:background="@drawable/text_bg"
-                    android:layout_weight="4"
+                    android:layout_weight="3"
                     android:singleLine="true"
                     android:layout_gravity="center"
                     android:gravity="center_vertical"
@@ -262,85 +252,91 @@
                     android:layout_height="match_parent"
                     android:text=""/>
             </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/input_layout2"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:stretchColumns = "1"
-                    >
+            <LinearLayout
+                android:layout_margin="10dp"
+                android:id="@+id/input_layout2"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:stretchColumns = "1"
+                >
 
-                    <TextView
-                        android:id="@+id/input_title2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:text="输入项" />
-                    <TextView
-                        android:id="@+id/input_text2"
-                        android:background="@drawable/text_bg"
-                        android:layout_weight="4"
-                        android:layout_gravity="center"
-                        android:gravity="center_vertical"
-                        android:layout_width="0dp"
-                        android:singleLine="true"
-                        android:layout_height="match_parent"
-                        android:text=""/>
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/input_layout3"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:stretchColumns = "1"
-                    >
-                    <TextView
-                        android:id="@+id/input_title3"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_gravity="center"
-                        android:text="输入项"/>
-                    <TextView
-                        android:id="@+id/input_text3"
-                        android:background="@drawable/text_bg"
-                        android:layout_weight="4"
-                        android:singleLine="true"
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:text=""/>
-                </LinearLayout>
-                <LinearLayout
-                    android:id="@+id/input_layout4"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:stretchColumns = "1"
-                    >
-                    <TextView
-                        android:id="@+id/input_title4"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_gravity="center"
-                        android:text="输入项"/>
-                    <TextView
-                        android:id="@+id/input_text4"
-                        android:background="@drawable/text_bg"
-                        android:layout_weight="4"
-                        android:gravity="center_vertical"
-                        android:singleLine="true"
-                        android:layout_gravity="center"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:text=""/>
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/input_title2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:textColor="@color/text_color_black"
+                    android:text="输入项" />
+                <TextView
+                    android:id="@+id/input_text2"
+                    android:background="@drawable/text_bg"
+                    android:layout_weight="3"
+                    android:layout_gravity="center"
+                    android:gravity="center_vertical"
+                    android:layout_width="0dp"
+                    android:singleLine="true"
+                    android:layout_height="match_parent"
+                    android:text=""/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_margin="10dp"
+                android:id="@+id/input_layout3"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:stretchColumns = "1"
+                >
+                <TextView
+                    android:id="@+id/input_title3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:textColor="@color/text_color_black"
+                    android:text="输入项"/>
+                <TextView
+                    android:id="@+id/input_text3"
+                    android:background="@drawable/text_bg"
+                    android:layout_weight="3"
+                    android:singleLine="true"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text=""/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_margin="10dp"
+                android:id="@+id/input_layout4"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:stretchColumns = "1"
+                >
+                <TextView
+                    android:id="@+id/input_title4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:textColor="@color/text_color_black"
+                    android:text="输入项"/>
+                <TextView
+                    android:id="@+id/input_text4"
+                    android:background="@drawable/text_bg"
+                    android:layout_weight="3"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:layout_gravity="center"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text=""/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 

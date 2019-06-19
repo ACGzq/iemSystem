@@ -35,7 +35,6 @@ public class HomePageFragment extends BaseFragment implements View.OnClickListen
         homeView.findViewById(R.id.maintain).setOnClickListener(this);
         homeView.findViewById(R.id.receiving_materials).setOnClickListener(this);
 
-
         return homeView;
     }
 

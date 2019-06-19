@@ -1,7 +1,10 @@
 package com.thok.iem.model;
 
-public class UserBean {
+import com.thok.iem.utils.DBAnno;
 
+import java.lang.reflect.Field;
+
+public class UserBean{
     /**
      * id : 2aa4a0ef44f847e7862f536b6c22a2e3
      * realName : 张三
@@ -18,6 +21,7 @@ public class UserBean {
      * password : 123456
      * token : cvy54y314hj
      */
+    @DBAnno(isKey = true)
     private String id;
     private String realName;
     private String userName;
@@ -30,6 +34,7 @@ public class UserBean {
     private String remark;
     private String updateTime;
     private String lastLoginTime;
+    @DBAnno(isCanNull = false, hasDefaultVault = true, defaultStringVaule = "123")
     private String password;
     private String token;
 
@@ -144,4 +149,5 @@ public class UserBean {
     public void setToken(String token) {
         this.token = token;
     }
+
 }

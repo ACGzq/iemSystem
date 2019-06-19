@@ -3,15 +3,22 @@ package com.thok.iem.ui.fragmentviewmodel;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.thok.iem.R;
+import com.thok.iem.model.UserBean;
 import com.thok.iem.ui.AlterPassActivity;
+import com.thok.iem.ui.BaseActivity;
+import com.thok.iem.utils.DataBaseHelp;
+import com.thok.iem.utils.SharedPreferencesUtil;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +39,12 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     private String mParam2;
     Activity masterActivity;
     private OnFragmentInteractionListener mListener;
+    private TextView userAccountText;
+    private TextView userNameText;
+    private TextView roleLabelText;
+    private TextView createTimeText;
+    private String userID;
+    private String passWord;
 
     public MyFragment() {
         // Required empty public constructor
@@ -62,6 +75,7 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        printLog("MyFragment","onCreate");
     }
 
     @Override
@@ -71,6 +85,23 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_my, container, false);
         view.findViewById(R.id.logout_button).setOnClickListener(this);
         view.findViewById(R.id.alter_password).setOnClickListener(this);
+        userAccountText = view.findViewById(R.id.user_account_label);
+        userNameText = view.findViewById(R.id.user_name_label);
+        roleLabelText = view.findViewById(R.id.role_label);
+        createTimeText = view.findViewById(R.id.create_time_label);
+        userID = SharedPreferencesUtil.getInstance(getActivity()).getString(BaseActivity.LAST_LOGIN_USER_ID);
+        DataBaseHelp dataBaseHelp = new DataBaseHelp(getActivity(),UserBean.class);
+        Cursor cursor = dataBaseHelp.getReadableDatabase().rawQuery("select * from UserBean where id=?",new String[]{userID});
+        printLog(getBaseTag(),"getCount = "+cursor.getCount());
+        if(cursor.moveToFirst()){
+
+            userAccountText.setText(cursor.getString(cursor.getColumnIndex("userName")));
+            userNameText.setText(cursor.getString(cursor.getColumnIndex("realName")));
+            passWord = cursor.getString(cursor.getColumnIndex("password"));
+            createTimeText.setText(cursor.getString(cursor.getColumnIndex("createTime")).split("\\.")[0]);
+            roleLabelText.setText(cursor.getString(cursor.getColumnIndex("remark")));
+
+        }
         return view;
     }
 
@@ -106,7 +137,10 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
                 masterActivity.finish();
                 break;
             case R.id.alter_password:
-                startActivity(new Intent(getActivity(),AlterPassActivity.class));
+                Intent intent = new Intent(getActivity(),AlterPassActivity.class);
+                intent.putExtra("password",passWord);
+                intent.putExtra(BaseActivity.LAST_LOGIN_USER_ID,userID);
+                startActivity(intent);
                 break;
             default:
         }

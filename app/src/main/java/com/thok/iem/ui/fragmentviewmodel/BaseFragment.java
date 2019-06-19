@@ -11,4 +11,7 @@ public class BaseFragment extends Fragment {
             Log.d(tag,log);
         }
     }
+    public String getBaseTag(){
+        return "iem"+this.getClass().getSimpleName();
+    }
 }

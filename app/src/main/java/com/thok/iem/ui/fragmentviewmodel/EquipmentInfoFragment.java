@@ -89,7 +89,7 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
         input_edit.onActionViewExpanded();
         input_edit.setSubmitButtonEnabled(true);
         ImageView im = input_edit.findViewById(R.id.search_go_btn);
-        im.setImageResource(R.drawable.ic_center_focus_weak_black_24dp);
+        im.setImageResource(R.drawable.saoma);
         im.setOnClickListener(this);
         input_edit.setOnQueryTextListener(this);
         swipeRefreshLayout = rootView.findViewById(R.id.info_list_swipe_refresh_layout);
@@ -206,8 +206,8 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
                     public void onSuccess(Response<DevicesResponse> response) {
                         DevicesResponse devices = response.body();
                         printLog("iem_EqInfoFragment", "onSuccess: "+response.body());
-                        if(devices!=null){
-                            List<DeviceBean> deviceList = devices.getData();
+                        List<DeviceBean> deviceList = devices.getData();
+                        if(deviceList!=null){
                             list.clear();
                             for(DeviceBean deviceBean:deviceList){
                                 list.add(deviceBean);

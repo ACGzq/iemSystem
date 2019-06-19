@@ -4,33 +4,37 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bottom_line_shape"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="20dp">
+    >
     <TextView
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
         android:id="@+id/item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="朗基努斯之枪"
-        android:textColor="@color/black"
+        android:textColor="@color/text_color_black"
         app:layout_constraintTop_toTopOf="parent"
         android:textSize="19sp"/>
     <TextView
         android:id="@+id/state_text"
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_marginRight="15dp"
+        android:layout_height="30dp"
         android:gravity="center"
         android:padding="2dp"
-        android:background="@drawable/bt_shape"
+        android:background="@drawable/bt_shape_bottom_half"
         android:textColor="@color/bg_color"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/item_title"
+        app:layout_constraintTop_toTopOf="parent"
         android:text="开机"/>
     <TextView
         android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
         android:id="@+id/item_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/item_title"
-        android:textColor="@color/black"
+        android:textColor="@color/text_color_black"
         android:lineSpacingExtra = "5dp"
         android:text="设备编号：001"/>
     <TextView
@@ -38,16 +42,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="图片："
-        android:layout_margin="10dp"
-        android:textColor="@color/black"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/text_color_black"
+        app:layout_constraintStart_toStartOf="@id/item_text"
         app:layout_constraintTop_toBottomOf="@id/item_text"/>
     <ImageView
-        android:layout_marginTop="10dp"
+
         android:id="@+id/img_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/item_text"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintTop_toTopOf="@id/img_text"
         app:layout_constraintStart_toEndOf="@id/img_text"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:src="@mipmap/ic_launcher"/>
 
 </android.support.constraint.ConstraintLayout>

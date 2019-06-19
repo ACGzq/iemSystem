@@ -1,27 +1,22 @@
 package com.thok.iem;
 
-
 import android.app.Application;
-import android.content.Context;
-
 import android.util.Log;
-
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
-
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
 public class ThokApplication extends Application {
+    public static String requestToken= "";
     @Override
     public void onCreate() {
-
         Log.d("iem_ThokApplication","ThokApplication_start");
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor("iem_OkGo");
         //log打印级别，决定了log显示的详细程度
-        loggingInterceptor.setPrintLevel(HttpLoggingInterceptor.Level.HEADERS);
+        loggingInterceptor.setPrintLevel(HttpLoggingInterceptor.Level.BODY);
         //log颜色级别，决定了log在控制台显示的颜色
         loggingInterceptor.setColorLevel(Level.INFO);
         OkHttpClient.Builder builder = new OkHttpClient.Builder();

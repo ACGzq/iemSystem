@@ -7,15 +7,15 @@ public class LoginRequest {
      * userName : xiaoming
      */
 
-    private String passWord;
+    private String password;
     private String userName;
 
     public String getPassWord() {
-        return passWord;
+        return password;
     }
 
     public void setPassWord(String passWord) {
-        this.passWord = passWord;
+        this.password = passWord;
     }
 
     public String getUserName() {

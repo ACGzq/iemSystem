@@ -27,7 +27,7 @@
                 android:layout_gravity="center"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
+                android:textColor="@color/bg_color"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home_title"/>
@@ -40,13 +40,14 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/patrol"
-            app:layout_constraintTop_toBottomOf="@id/toolbar2"
-            app:layout_constraintBottom_toTopOf="@id/repair_task">
+            app:layout_constraintTop_toTopOf="@id/patrol"
+            app:layout_constraintBottom_toBottomOf="@id/patrol"
+            >
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/shebeibaoxiu" />
             <TextView
                 android:text="@string/thok_equipment_repair_request"
                 android:layout_width="wrap_content"
@@ -54,19 +55,21 @@
         </LinearLayout>
         <LinearLayout
             android:id="@+id/patrol"
-            android:gravity="center_horizontal"
+            android:gravity="center"
             android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintVertical_weight="1"
             app:layout_constraintStart_toEndOf="@id/repair_request"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/repair_task"
             app:layout_constraintTop_toBottomOf="@id/toolbar2"
-            app:layout_constraintBottom_toTopOf="@id/maintain">
+            app:layout_constraintBottom_toTopOf="@id/receiving_materials">
             <ImageView
+                android:id="@+id/patrol_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/shebeixunjian" />
             <TextView
                 android:text="@string/thok_patrol"
                 android:layout_width="wrap_content"
@@ -78,15 +81,16 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@id/maintain"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/repair_request"
-            app:layout_constraintBottom_toBottomOf="@id/receiving_materials">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/patrol"
+            app:layout_constraintTop_toTopOf="@id/patrol"
+            app:layout_constraintBottom_toBottomOf="@id/patrol"
+            >
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/weixiurenwu" />
             <TextView
                 android:text="@string/thok_repair_task"
                 android:layout_width="wrap_content"
@@ -98,15 +102,14 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/repair_task"
-            app:layout_constraintTop_toBottomOf="@id/patrol"
-            app:layout_constraintBottom_toBottomOf="@id/blank">
+            app:layout_constraintStart_toStartOf="@id/repair_request"
+            app:layout_constraintTop_toTopOf="@id/receiving_materials"
+            >
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/baoyangrenwu" />
             <TextView
                 android:text="@string/thok_maintain_task"
                 android:layout_width="wrap_content"
@@ -117,37 +120,16 @@
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/blank"
-            app:layout_constraintTop_toBottomOf="@id/repair_task"
+            android:layout_height="0dp"
+            app:layout_constraintVertical_weight="2"
+            app:layout_constraintStart_toStartOf="@id/patrol"
+            app:layout_constraintTop_toBottomOf="@id/patrol"
             app:layout_constraintBottom_toBottomOf="parent">
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
-            <TextView
-                android:text="@string/title_receiving_materials"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-        <LinearLayout
-            android:visibility="invisible"
-            android:id="@+id/blank"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/receiving_materials"
-            app:layout_constraintTop_toBottomOf="@id/maintain"
-            app:layout_constraintBottom_toBottomOf="parent">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/app_name"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@drawable/lingliaoshenqing" />
             <TextView
                 android:text="@string/title_receiving_materials"
                 android:layout_width="wrap_content"

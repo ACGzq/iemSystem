@@ -1,6 +1,7 @@
 package com.thok.iem.ui;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.IBinder;
@@ -28,6 +29,7 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
     public static final  String KEY_WORD_SEEK = "KEY_WORD_SEEK";
     public static final  String INQUIRY_RESULT_DATA = "INQUIRY_RESULT_DATA";
     public static final String INTENT_FILTER_ACTION = "com.thok.iem.action";
+    public static final String LAST_LOGIN_USER_ID = "LAST_LOGIN_USER_ID";
     public static final int TASK_DONE = 6666;
     public static final int TASK_CANCEL = 7777;
     public static final int FINISH_APP = 4321;
@@ -40,6 +42,7 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
     public static final  int ON_ITEM_SELECTED = 1007;
     protected   String tag = "";
     protected PopupWindow popupWindow;
+    protected ProgressDialog mProgressDialog;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -71,6 +74,13 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
         for(Activity a:activityArrayList){
             a.finish();
         }
+    }
+    protected void showProgressDialog(String msg){
+       mProgressDialog = ProgressDialog.show(this,"",msg,true,false);
+    }
+    protected void hidtProgressDialog(){
+        if(mProgressDialog!=null)
+            mProgressDialog.cancel();
     }
 
     @Override
@@ -114,6 +124,7 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
      * @param token
      */
     protected void hideKeyboard(IBinder token) {
+        printLog(tag,"token="+token);
         if (token != null) {
             InputMethodManager im = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             im.hideSoftInputFromWindow(token, InputMethodManager.HIDE_NOT_ALWAYS);

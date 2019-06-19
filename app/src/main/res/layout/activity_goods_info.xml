@@ -23,7 +23,7 @@
             android:text="@string/thok_goods_info"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_white"
             android:layout_gravity="center"/>
     </android.support.v7.widget.Toolbar>
 
@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bottom_line_shape"
         android:text="@string/thok_repair_order"
-        android:textColor="@color/black"
+        android:textColor="@color/text_color_black"
         android:textSize="17sp"
         android:layout_margin="5dp"
         android:lineSpacingExtra = "5dp"
@@ -49,14 +49,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_black"
             android:textSize="17sp"
             android:layout_weight="3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/thok_goods_detailed"/>
         <TextView
-            android:textColor="@color/black"
+            android:textColor="@color/text_color_black"
             android:textSize="17sp"
             android:layout_weight="1"
             android:layout_width="0dp"
@@ -88,7 +88,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
-                android:textColor="@color/black"
+                android:textColor="@color/text_color_black"
                 android:text="序号"/>
             <TextView
                 android:background="@drawable/text_bg"
@@ -97,7 +97,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
-                android:textColor="@color/black"
+                android:textColor="@color/text_color_black"
                 android:text="名称"/>
             <TextView
                 android:background="@drawable/text_bg"
@@ -106,7 +106,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
-                android:textColor="@color/black"
+                android:textColor="@color/text_color_black"
                 android:text="型号"/>
             <TextView
                 android:background="@drawable/text_bg"
@@ -115,7 +115,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
-                android:textColor="@color/black"
+                android:textColor="@color/text_color_black"
                 android:text="数量"/>
         </LinearLayout>
         <android.support.v7.widget.RecyclerView

@@ -4,7 +4,7 @@
     android:shape="line">
     <item android:left="0dp" android:right="0dp">
         <shape>
-        <solid android:color="@color/black" />
+        <solid android:color="@color/text_color_black" />
         </shape>
     </item>
     <item android:top="1dp">
