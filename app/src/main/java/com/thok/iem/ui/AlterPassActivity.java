@@ -87,7 +87,7 @@ public class AlterPassActivity extends BaseActivity {
         updataPWRequest.setNewPassword(newPassWord);
         updataPWRequest.setOldPassword(originPassEdit.getText().toString());
         if(checkPass())
-            OkGo.<BaseResponse>post(RequestURLs.URL_UPDATA_PW)
+            OkGo.<BaseResponse>post(RequestURLs.getUrlUpdataPw())
                 .tag(this)
             .upJson(updataPWRequest.toJsonString())
                     .execute(new OkGoJsonCallback<BaseResponse>() {

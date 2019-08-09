@@ -51,7 +51,7 @@
         app:layout_constraintEnd_toStartOf="@id/search_bt"
         app:layout_constraintTop_toBottomOf="@+id/add_goods_toolbar"
         app:layout_constraintBottom_toBottomOf="@id/search_bt"
-        android:text="北京"
+        android:text="无人机"
         android:background="@drawable/text_bg"/>
     <Button
         android:id="@+id/search_bt"
@@ -97,7 +97,7 @@
         app:layout_constraintEnd_toStartOf="@id/model_text"
         android:textColor="@color/text_color_black"
         android:text="数量"/>
-    <TextView
+    <EditText
         android:layout_marginTop="10dp"
         android:id="@+id/quantity_text"
         android:background="@drawable/text_bg"
@@ -108,5 +108,6 @@
         app:layout_constraintStart_toStartOf="@id/name_text"
         app:layout_constraintTop_toBottomOf="@id/model_text"
         app:layout_constraintEnd_toStartOf="@id/search_bt"
-        android:text="5"/>
+        android:inputType="number"
+        android:text="1"/>
 </android.support.constraint.ConstraintLayout>

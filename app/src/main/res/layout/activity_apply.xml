@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_color"
-    tools:context=".ui.ApplyActivity">
+    tools:context=".ui.ApplyGoodsActivity">
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
@@ -51,7 +51,7 @@
         app:layout_constraintTop_toTopOf="@id/title_order"
         app:layout_constraintBottom_toBottomOf="@id/title_order"
         android:id="@+id/edit_order"
-        android:text="1212"
+        android:text="点击选择"
         android:gravity="center_vertical"
         android:layout_width="0dp"
         android:layout_height="30dp"

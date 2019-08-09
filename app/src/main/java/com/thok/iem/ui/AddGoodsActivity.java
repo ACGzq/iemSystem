@@ -8,16 +8,17 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.thok.iem.R;
-import com.thok.iem.model.Component;
-
-import java.util.regex.Pattern;
 
 public class AddGoodsActivity extends BaseActivity implements View.OnClickListener {
-    private TextView name_text,model_text,quantity_text;
+    private TextView name_text,model_text;
+    EditText quantity_text;
+    int totalNum = 0;
+    String goodsID = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +45,18 @@ public class AddGoodsActivity extends BaseActivity implements View.OnClickListen
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_submit:
-                if(TextUtils.isEmpty(name_text.getText())){
+                if(TextUtils.isEmpty(name_text.getText())|| TextUtils.isEmpty(quantity_text.getText())){
                     Toast.makeText(this,"输入为空",Toast.LENGTH_SHORT).show();
+                }else if(totalNum == 0 ){
+                    Toast.makeText(this,"无库存",Toast.LENGTH_SHORT).show();
+                }else if(Integer.parseInt(quantity_text.getText().toString())>totalNum){
+                    Toast.makeText(this,"超出库存",Toast.LENGTH_SHORT).show();
                 }else{
-                    getIntent().putExtra(Component.KEY_WORD_COMPONENT_NAME,name_text.getText().toString());
-                    getIntent().putExtra(Component.KEY_WORD_MODEL_TYPE,model_text.getText().toString());
+                    getIntent().putExtra(INQUIRY_RESULT_DATA_NAME,name_text.getText().toString());
+                    getIntent().putExtra(INQUIRY_RESULT_DATA_SPECIFICATIONS,model_text.getText().toString());
+                    getIntent().putExtra(INQUIRY_RESULT_DATA_ID,goodsID);
                     String mumber = quantity_text.getText().toString();
-                    Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-                    mumber = pattern.matcher(mumber).matches()?mumber:"0";
-                    getIntent().putExtra(Component.KEY_WORD_AMOUNT,Integer.parseInt(mumber));
+                    getIntent().putExtra(INQUIRY_RESULT_DATA_NUMBER,Integer.parseInt(mumber));
                     setResult(TASK_DONE,getIntent());
                     finish();
                 }
@@ -76,9 +80,10 @@ public class AddGoodsActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(resultCode == ON_ITEM_SELECTED){
-            name_text.setText(data.getStringExtra(INQUIRY_RESULT_DATA));
-            model_text.setText("dL");
-            quantity_text.setText("2");
+            name_text.setText(data.getStringExtra(INQUIRY_RESULT_DATA_NAME));
+            model_text.setText(data.getStringExtra(INQUIRY_RESULT_DATA_SPECIFICATIONS));
+            totalNum = data.getIntExtra(INQUIRY_RESULT_DATA_NUMBER,0);
+            goodsID = data.getStringExtra(INQUIRY_RESULT_DATA_ID);
         }
 
         super.onActivityResult(requestCode, resultCode, data);

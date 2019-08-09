@@ -28,15 +28,22 @@ import android.widget.Toast;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
-import com.lzy.okgo.request.base.Request;
 import com.thok.iem.R;
+import com.thok.iem.ThokApplication;
+import com.thok.iem.httpUtil.ErrCode;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
 import com.thok.iem.httpUtil.RequestURLs;
-import com.thok.iem.model.BaseRequest;
 import com.thok.iem.model.GoodsBean;
 import com.thok.iem.model.MaintenanceBean;
 import com.thok.iem.model.MaintenanceResponse;
+import com.thok.iem.model.PickListRequest;
+import com.thok.iem.model.PickListResponse;
+import com.thok.iem.model.RepairTaskRequest;
+import com.thok.iem.model.RepairTaskResponse;
 import com.thok.iem.model.SearchMaintenanceRequest;
+import com.thok.iem.model.SearchPageRequest;
+import com.thok.iem.model.SpareBean;
+import com.thok.iem.model.SpareResponse;
 import com.thok.iem.utils.AutoFilterListAdapter;
 import com.thok.iem.utils.QuickAdapter;
 
@@ -58,6 +65,10 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     private Intent intent;
     private String[] mStrs = {"ACG00011", "AVG00011", "AVG00112", "BBC12345","TNT23333","FBI WARRING"};
     private ListView mListView;
+    private String queryString;
+    private int pageNumber = 0;
+    private int totalPage = 2;
+    private int taskType = 0;
     //private boolean needHint = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +79,10 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener((View view)->this.finish());
         //引入依附的布局
-
+        taskType = getIntent().getIntExtra(TASK_TYPE,0);
         titleView = findViewById(R.id.inquiry_title);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(()->getData(input_edit.getQuery().toString()));
+        swipeRefreshLayout.setOnRefreshListener(()-> getData(input_edit.getQuery().toString()));
         recyclerView = findViewById(R.id.recycler_view);
         findViewById(R.id.inquiry_button).setOnClickListener((view)->onQueryTextSubmit(input_edit.getQuery().toString()));
         input_edit = findViewById(R.id.input_edit);
@@ -99,22 +110,42 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
             @Override
             public void convert(QuickAdapter.QuickVH holder, Object data, int position) {
-                if(data instanceof MaintenanceBean){
+                holder.getConvertView().setTag("default");
+                if(data instanceof String){
+                    holder.setText(R.id.item_text,(String)data);
+                    holder.getView(R.id.item_title).setVisibility(View.GONE);
+                    holder.getConvertView().setTag("get_more");
+                }else if(data instanceof MaintenanceBean){
                     holder.setText(R.id.item_text,String.format("设备编号:%s %n保养项目: %s %n保养周期: %s %n更换周期: %s %n养护人: %s %n",
                             ((MaintenanceBean)data).getDeviceNum()+position,((MaintenanceBean)data).getProgrem(),((MaintenanceBean)data).getDays(),
                             ((MaintenanceBean)data).getChangeDays(),((MaintenanceBean)data).getMaintenancer()));
                     holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
                     holder.setText(R.id.item_title,((MaintenanceBean)data).getDeviceName());
-                }else {
+                }else if(data instanceof SpareBean){
+                    holder.setText(R.id.item_text,String.format("备件编号:%s %n备件数量: %s %n规格型号: %s %n计量单位: %s %n供应商: %s %n",
+                            ((SpareBean)data).getSpareNo(),((SpareBean)data).getNumber(),((SpareBean)data).getSpecifications(),
+                            ((SpareBean)data).getUnit(),((SpareBean)data).getSupplier()));
+                    holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
+                    holder.setText(R.id.item_title,((SpareBean)data).getSpareName());
+                }else if(data instanceof RepairTaskResponse.DataBean){
+                    RepairTaskResponse.DataBean dataBean = (RepairTaskResponse.DataBean) data;
+                    holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
+                    holder.setText(R.id.item_title,dataBean.getRepairCode());
+                    holder.setText(R.id.item_text,String.format("设备编号:%s %n设备位置: %s %n设备名称: %s %n报修人: %s %n报修时间: %s %n报修内容: %s %n",
+                            dataBean.getDeviceVo().getDeviceNo(),dataBean.getDeviceVo().getPosition(),dataBean.getDeviceVo().getDeviceName(),dataBean.getReportUser(),dataBean.getReportTime(),dataBean.getContent()));
+                }else if(data instanceof PickListResponse.DataBean){
+                    PickListResponse.DataBean dataBean = (PickListResponse.DataBean) data;
+                   // holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
+                   // holder.setText(R.id.item_title,dataBean.getPickNo());
+                    holder.setText(R.id.item_text,String.format("领料单号：%s %n申请时间：%s %n申请人：%s %n",dataBean.getPickNo(),dataBean.getCreateTime(),dataBean.getPickUser()));
+                }else{
                     holder.setText(R.id.item_text,"position = "+position);
                 }
 
             }
 
             @Override
-            public int getItemViewType(int position) {
-                return super.getItemViewType(position);
-            }
+            public int getItemViewType(int position) { return super.getItemViewType(position);}
         };
         recycleAdapter.setOnItemClickListener(this);
         recyclerView.setAdapter(recycleAdapter);
@@ -149,7 +180,6 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         });
     //设置增加或删除条目的动画
         recyclerView.setItemAnimator( new DefaultItemAnimator());
-        getData("");
         initUi(getIntent().getIntExtra(TASK_TYPE,0));
 
     }
@@ -165,139 +195,251 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         input_edit.clearFocus();
         super.onResume();
     }
-
-    private void getData(String str) {
-        String url,jsonParamsStr;
-        switch (getIntent().getIntExtra(TASK_TYPE,0)){
-            case TASK_MAINTAIN:
-                if(TextUtils.isEmpty(str)){
-                    Toast.makeText(this,"未检测搜索内容，启用默认搜索",Toast.LENGTH_SHORT).show();
-                    url = RequestURLs.URL_FIND_MAINTENANCE;
-                    jsonParamsStr = new BaseRequest("token","id").toJsonString();
-                }else{
-                    url = RequestURLs.URL_SEARCH_MAINTENANCE;
-                    SearchMaintenanceRequest searchMaintenanceRequest = new SearchMaintenanceRequest("token");
-                    Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
-                    if(pattern.matcher(str).matches()){
-                        searchMaintenanceRequest.setDeviceNum(str);
-                    }else{
-                        searchMaintenanceRequest.setDeviceName(str);
-                    }
-                    jsonParamsStr = searchMaintenanceRequest.toJsonString();
-                }
-                OkGo.<MaintenanceResponse>post(url)
-                        .tag(this)
-                        .upJson(jsonParamsStr)
-                        .execute(new OkGoJsonCallback<MaintenanceResponse>() {
-                            @Override
-                            public void onErrorMessage(String str,int code) {
-                                if(swipeRefreshLayout.isRefreshing()){
-                                    swipeRefreshLayout.setRefreshing(false);
-                                }
-                                Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onSuccess(Response<MaintenanceResponse> response) {
-                                List<MaintenanceBean> maintenanceList = response.body().getData();
-                                if(maintenanceList!=null){
-                                    list.clear();
-                                    for (MaintenanceBean maintenanceBean:maintenanceList){
-                                        list.add(maintenanceBean);
-                                    }
-                                }
-                                recycleAdapter.notifyDataSetChanged();
-                                if(swipeRefreshLayout.isRefreshing())
-                                    swipeRefreshLayout.setRefreshing(false);
-                            }
-
-                            @Override
-                            public void onStart(Request<MaintenanceResponse, ? extends Request> request) {
-                                super.onStart(request);
-                                if(!swipeRefreshLayout.isRefreshing()){
-                                    swipeRefreshLayout.setRefreshing(true);
-                                }
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                super.onFinish();
-                                if(!swipeRefreshLayout.isRefreshing()){
-                                    swipeRefreshLayout.setRefreshing(false);
-                                }
-                            }
-                        });
-                break;
-            default:
-                list.clear();
-                for(int i=0;i<20;i++){
-                    MaintenanceBean maintenanceBean = new MaintenanceBean();
-                    maintenanceBean.setChangeDays("72");
-                    maintenanceBean.setDays("36");
-                    maintenanceBean.setDeviceName("回旋加速喷气式阿姆斯特朗炮");
-                    maintenanceBean.setMaintenancer("坂田银时");
-                    maintenanceBean.setProgrem("万事屋");
-                    maintenanceBean.setDeviceNum("9543");
-                    list.add(maintenanceBean);
-        }
-        recycleAdapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_submit:
-               startActivity(new Intent(this,ApplyActivity.class));
+                startActivity(new Intent(this,ApplyGoodsActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.action_menu_submit, menu);
-        if(getIntent().getIntExtra(TASK_TYPE,0) == TASK_MATERIAL_APPLY){
-            menu.getItem(0).setTitle("申请");
+        if(taskType != TASK_SEEK_GOODS && taskType != TASK_MAINTAIN && taskType != TASK_SEARCH_REPAIR){
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.action_menu_submit, menu);
+            if(getIntent().getIntExtra(TASK_TYPE,0) == TASK_MATERIAL_APPLY){
+                menu.getItem(0).setTitle("申请");
+            }
         }
-       return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+    private void getData(String str){
+        getData(str,0);
+    }
+    private void getData(String str,int page) {
+        queryString = str;
+        String url,jsonParamsStr;
+        switch (getIntent().getIntExtra(TASK_TYPE,0)){
+            case TASK_REPAIR_REPORT://维修任务
+            case TASK_SEARCH_REPAIR:
+                url = RequestURLs.getUrlDeviceRepairTask();
+                RepairTaskRequest repairTaskRequest = new RepairTaskRequest();
+                repairTaskRequest.setKeyword(str);
+                repairTaskRequest.setToken(ThokApplication.requestToken);
+                if(page>0){
+                    repairTaskRequest.setPageNo(String.valueOf(page));
+                }
+                repairTaskRequest.setPageSize("10");
+                OkGo.<RepairTaskResponse>post(url)
+                        .tag(this)
+                        .upJson(repairTaskRequest.toJsonString())
+                        .execute(new OkGoJsonCallback<RepairTaskResponse>(swipeRefreshLayout) {
+                            @Override
+                            public void onErrorMessage(String str, int code) {
+                                if(code == ErrCode.tokenExpired){
+                                    compelLogOut();
+                                }else{
+                                    Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(Response<RepairTaskResponse> response) {
+                                    List<RepairTaskResponse.DataBean> dataBeans = response.body().getData();
+                                    if(page<1){
+                                        list.clear();
+                                    }
+                                    dataBeans.forEach(dataBean -> list.add(dataBean));
+                                if(response.body().getTotalCount()>10 && page<response.body().getTotalPage()){
+                                    list.add("点击获得更多");
+                                }
+                                recycleAdapter.notifyItemRangeChanged(list.size()-dataBeans.size(),dataBeans.size());
+                            }
+                        });
+                break;
+            case TASK_MAINTAIN://保养任务
+                 url = RequestURLs.getUrlSearchMaintenance();
+                SearchMaintenanceRequest searchMaintenanceRequest = new SearchMaintenanceRequest();
+                if(page>0){
+                    searchMaintenanceRequest.setPageNo(String.valueOf(page));
+                }
+                searchMaintenanceRequest.setPageSize("10");
+                searchMaintenanceRequest.setToken(ThokApplication.requestToken);
+                Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");//是否是数字
+                if(TextUtils.isEmpty(str)){
+                    Toast.makeText(this,"未检测搜索内容，启用默认搜索",Toast.LENGTH_SHORT).show();
+                }else if(pattern.matcher(str).matches()){
+                    searchMaintenanceRequest.setDeviceNo(str);
+                }else{
+                    searchMaintenanceRequest.setDeviceName(str);
+                }
+                jsonParamsStr = searchMaintenanceRequest.toJsonString();
+
+                OkGo.<MaintenanceResponse>post(url)
+                        .tag(this)
+                        .upJson(jsonParamsStr)
+                        .execute(new OkGoJsonCallback<MaintenanceResponse>(swipeRefreshLayout) {
+                            @Override
+                            public void onErrorMessage(String str,int code) {
+                                if(code == ErrCode.tokenExpired){
+                                    compelLogOut();
+                                }else{
+                                    Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(Response<MaintenanceResponse> response) {
+                                List<MaintenanceBean> maintenanceList = response.body().getData();
+                                if(maintenanceList!=null){
+                                    if(page<1){
+                                        list.clear();
+                                    }
+                                    for (MaintenanceBean maintenanceBean:maintenanceList){
+                                        list.add(maintenanceBean);
+                                    }
+                                    if(response.body().getTotalCount()>10){
+                                        list.add("点击获得更多");
+                                    }
+                                }
+                                recycleAdapter.notifyDataSetChanged();
+                            }
+                        });
+                break;
+            case TASK_SEEK_GOODS://设备选择
+                SearchPageRequest searchPageRequest = new SearchPageRequest();
+                searchPageRequest.setToken(ThokApplication.requestToken);
+                if(TextUtils.isEmpty(str)){
+                    searchPageRequest.setStatus("0");
+                }else if (str.getBytes().length == str.length()) {//无汉字
+                    searchPageRequest.setSpareNo(str);
+                } else {//有汉字
+                    searchPageRequest.setSpareName(str);
+                }
+
+                if(page>0){
+                    searchPageRequest.setPageNo(String.valueOf(page));
+                }
+                searchPageRequest.setPageSize("10");
+                OkGo.<SpareResponse>post(RequestURLs.getUrlSpareSearch())
+                        .tag(this)
+                        .upJson(searchPageRequest.toJsonString())
+                        .execute(new OkGoJsonCallback<SpareResponse>(swipeRefreshLayout) {
+                            @Override
+                            public void onErrorMessage(String str, int code) {
+                                if(code == ErrCode.tokenExpired){
+                                    compelLogOut();
+                                }else{
+                                    Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(Response<SpareResponse> response) {
+                                List<SpareBean> spareList = response.body().getData();
+                                if(spareList!=null){
+                                    if(page<1){
+                                        list.clear();
+                                    }
+                                    for (SpareBean spareBean:spareList){
+                                        list.add(spareBean);
+                                    }
+                                    if(response.body().getTotalCount()>10){
+                                        list.add("点击获得更多");
+                                    }
+                                }
+                                recycleAdapter.notifyDataSetChanged();
+                            }
+                        });
+                break;
+            case TASK_MATERIAL_APPLY://领料申请
+                PickListRequest pickListRequest = new PickListRequest();
+                pickListRequest.setToken(ThokApplication.requestToken);
+                if(str != null){
+                    pickListRequest.setPickNo(str);
+                }
+                if(page>0){
+                    pickListRequest.setPageNo(String.valueOf(page));
+                }
+                pickListRequest.setPageSize("10");
+                OkGo.<PickListResponse>post(RequestURLs.getUrlSparePickList())
+                        .tag(this)
+                        .upJson(pickListRequest.toJsonString())
+                        .execute(new OkGoJsonCallback<PickListResponse>(swipeRefreshLayout) {
+                            @Override
+                            public void onErrorMessage(String str, int code) {
+                                if(code == ErrCode.tokenExpired){
+                                    compelLogOut();
+                                }else{
+                                    Toast.makeText(TaskInquiryActivity.this,str,Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(Response<PickListResponse> response) {
+                                if(page<1){
+                                    list.clear();
+                                }
+                                response.body().getData().forEach((obj)->list.add(obj));
+                                if(response.body().getTotalCount()>10){
+                                    list.add("点击获得更多");
+                                }
+                                recycleAdapter.notifyDataSetChanged();
+                            }
+                        });
+            default:
+                list.clear();
+                for(int i=0;i<20;i++){
+                    MaintenanceBean maintenanceBean = new MaintenanceBean();
+                    maintenanceBean.setChangeDays("72");
+                    maintenanceBean.setDays("36");
+                    maintenanceBean.setDeviceName("领料单");
+                    maintenanceBean.setMaintenancer("坂田银时");
+                    maintenanceBean.setProgrem("万事屋");
+                    maintenanceBean.setDeviceNum("9543");
+                    list.add(maintenanceBean);
+                }
+                recycleAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+        }
     }
     public void initUi(int type){
         switch (type){
-            case TASK_PATROL:
+            case TASK_PATROL://设备巡检
             titleView.setText(R.string.thok_patrol);
             intent = new Intent(this,TaskSubmitActivity.class);
             intent.putExtra(TASK_TYPE,type);
             break;
-            case TASK_MATERIAL_APPLY:
+            case TASK_MATERIAL_APPLY://领料申请
                 titleView.setText(R.string.title_receiving_materials);
-                getData("领料单号：32323232\n" +
-                        "申请人：史蒂夫瑟\n" +
-                        "申请时间：2019-05-09");
+                getData("");
                intent = new Intent(this,GoodsInfoActivity.class);
                intent.putExtra(TASK_TYPE,type);
 
                 break;
-            case TASK_RPAIR_REPORT:
+
+            case TASK_REPAIR_REPORT://维修任务
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
+            case TASK_SEARCH_REPAIR:
                 titleView.setText(R.string.thok_repair_task);
-
+                getData("");
                 break;
-            case TASK_MAINTAIN:
+            case TASK_MAINTAIN://保养任务
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
                 titleView.setText(R.string.thok_maintain_task);
-
+                getData("");
                 break;
-            case TASK_SEEK_GOODS:
+            case TASK_SEEK_GOODS://设备选择
                 titleView.setText(R.string.thok_equipment_select);
                 findViewById(R.id.input_title).setVisibility(View.VISIBLE);
                 String seek = getIntent().getStringExtra(KEY_WORD_SEEK);
                 printLog(tag,"seek = "+seek);
-                input_edit.setQuery(seek,false);
-
+                input_edit.setQuery(seek,true);
+                break;
              default:
         }
     }
@@ -306,16 +448,60 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
      * */
     @Override
     public void onItemClick(View view, int position) {
-        if(intent != null){
+        if(list.size() == position+1 && list.size()>10){
+            list.remove(list.size()-1);
+            getData(queryString,list.size()/10+1);
+        }else if(intent != null){
             intent.putExtra("item",position);
+            if(taskType == TASK_REPAIR_REPORT){
+                RepairTaskResponse.DataBean dataBean = (RepairTaskResponse.DataBean) list.get(position);
+                intent.putExtra("DeviceName",dataBean.getDeviceVo().getDeviceName());
+                intent.putExtra("DevicePosition",dataBean.getDeviceVo().getPosition());
+                intent.putExtra("ReportContent",dataBean.getContent());
+                intent.putExtra("ReportCode",dataBean.getRepairCode());
+                intent.putExtra("ReportId",dataBean.getId());
+            }else if(taskType == TASK_MAINTAIN){
+                MaintenanceBean maintenanceBean = (MaintenanceBean) list.get(position);
+                intent.putExtra("DeviceNum",maintenanceBean.getDeviceNum());
+                intent.putExtra("Progrem",maintenanceBean.getProgrem());
+                intent.putExtra("DeviceName",maintenanceBean.getDeviceName());
+                intent.putExtra("MaintainId",maintenanceBean.getId());
+                intent.putExtra("Days",maintenanceBean.getDays());
+                intent.putExtra("ChangeDays",maintenanceBean.getChangeDays());
+            }else if(taskType == TASK_MATERIAL_APPLY){
+                PickListResponse.DataBean dataBean = (PickListResponse.DataBean) list.get(position);
+                intent.putExtra("PickId",dataBean.getId());
+                intent.putExtra("PickNo",dataBean.getPickNo());
+                intent.putExtra("CreateTime",dataBean.getCreateTime());
+                intent.putExtra("PickUser",dataBean.getPickUser());
+                intent.putExtra("RepairId",dataBean.getRepairId());
+                intent.putExtra("RepairUser",dataBean.getRepair().getRepairUser());
+                intent.putExtra("RepairCreateTime",dataBean.getRepair().getCreateTime());
+                intent.putExtra("RepairContent",dataBean.getRepair().getContent());
+            }
             startActivityForResult(intent,0);
-        }else {
+        }else if(taskType == TASK_SEARCH_REPAIR){
+            RepairTaskResponse.DataBean dataBean = (RepairTaskResponse.DataBean) list.get(position);
+            Intent searchiResultIntent = new Intent();
+            searchiResultIntent.putExtra("ReportCode",dataBean.getRepairCode());
+            searchiResultIntent.putExtra("ReportId",dataBean.getId());
+            searchiResultIntent.putExtra("ReportContent",dataBean.getContent());
+            setResult(TASK_SEARCH_REPAIR,searchiResultIntent);
+            finish();
+        }else{
             mListView.clearTextFilter();
             historyAdapter.getFilter().filter("");
             mListView.setVisibility(View.GONE);
             new AlertDialog.Builder(this)
                     .setTitle("确定所选吗")
-                    .setNegativeButton("确定",((dialog, which) ->{setResult(ON_ITEM_SELECTED,getIntent().putExtra(INQUIRY_RESULT_DATA,list.get(position).toString()));
+                    .setNegativeButton("确定",((dialog, which) ->{
+                        Intent intent = getIntent();
+                        SpareBean spareBean = (SpareBean)list.get(position);
+                        intent.putExtra(INQUIRY_RESULT_DATA_NAME,spareBean.getSpareName());
+                        intent.putExtra(INQUIRY_RESULT_DATA_SPECIFICATIONS,spareBean.getSpecifications());
+                        intent.putExtra(INQUIRY_RESULT_DATA_NUMBER,spareBean.getNumber());
+                        intent.putExtra(INQUIRY_RESULT_DATA_ID,spareBean.getId());
+                        setResult(ON_ITEM_SELECTED,intent);
                         finish();} ))
                     .setPositiveButton("取消",(dialog, which)->{})
                     .show();
@@ -336,6 +522,9 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     @Override
     public boolean onQueryTextSubmit(String s) {
         getData(s);
+        mListView.clearTextFilter();
+        historyAdapter.getFilter().filter("");
+        mListView.setVisibility(View.GONE);
         return false;
     }
 

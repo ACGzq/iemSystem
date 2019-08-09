@@ -7,9 +7,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.model.Response;
 import com.thok.iem.R;
+import com.thok.iem.ThokApplication;
+import com.thok.iem.httpUtil.OkGoJsonCallback;
+import com.thok.iem.httpUtil.RequestURLs;
 import com.thok.iem.model.GoodsBean;
+import com.thok.iem.model.PickDetailRequest;
+import com.thok.iem.model.PickDetailResponse;
 import com.thok.iem.utils.QuickAdapter;
 
 import java.util.ArrayList;
@@ -22,7 +30,7 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
     private View info_detailed;
     private boolean showDetailed;
     private QuickAdapter quickAdapter;
-    private List<GoodsBean> list = new ArrayList<>();
+    private List<PickDetailResponse.DataBean.DetailsBean> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,25 +44,35 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
         info_detailed = findViewById(R.id.info_detailed);
         detailed_list_view = findViewById(R.id.detailed_list_view);
         detailed_list_view.setLayoutManager(new LinearLayoutManager(this));
-        quickAdapter = new QuickAdapter<GoodsBean>(list) {
+        quickAdapter = new QuickAdapter<PickDetailResponse.DataBean.DetailsBean>(list) {
             @Override
             public int getLayoutId(int viewType) {
                 return R.layout.list_item_edging;
             }
 
             @Override
-            public void convert(QuickVH holder, GoodsBean data, int position) {
+            public void convert(QuickVH holder, PickDetailResponse.DataBean.DetailsBean data, int position) {
                 holder.setText(R.id.item1,position+1+"");
-                holder.setText(R.id.item2,data.getSpareName());
-                holder.setText(R.id.item3,data.getSpecifications());
-                holder.setText(R.id.item4,data.getNumber());
+                holder.setText(R.id.item2,data.getSpare().getSpareName());
+                holder.setText(R.id.item3,data.getSpare().getSpecifications());
+                holder.setText(R.id.item4,String.valueOf(data.getSpare().getNumber()));
             }
 
         };
         detailed_list_view.setAdapter(quickAdapter);
         //detailed_list_view.setAdapter(new QuickAdapter<String>());
-        goods_info_text.setText("领料单号：334343434\n申请时间：2029/2/3\n申报人：施瓦辛格\n报修编号：007" +
-                "\n报修设备：阿姆斯特朗回旋加速喷气式阿姆斯特朗炮\n报修人：托尼史塔克\n报修时间：2012/12/12\n报修内容：");
+        /*
+        * intent.putExtra("PickNo",dataBean.getPickNo());
+                intent.putExtra("CreateTime",dataBean.getCreateTime());
+                intent.putExtra("PickUser",dataBean.getPickUser());
+                intent.putExtra("RepairId",dataBean.getRepairId());
+                intent.putExtra("RepairUser",dataBean.getRepair().getRepairUser());
+                intent.putExtra("RepairCreateTime",dataBean.getRepair().getCreateTime());
+                intent.putExtra("RepairContent",dataBean.getRepair().getContent());*/
+        goods_info_text.setText(String.format("领料单号：%s %n申请时间：%s %n申报人：%s %n报修编号：%s %n报修设备：%s %n报修人：%s %n报修时间：%s %n报修内容：%s %n",
+                getIntent().getStringExtra("PickNo"),getIntent().getStringExtra("CreateTime"),getIntent().getStringExtra("PickUser"),
+                getIntent().getStringExtra("RepairId"),"",getIntent().getStringExtra("RepairUser"),
+                getIntent().getStringExtra("RepairCreateTime"),getIntent().getStringExtra("RepairContent")));
     }
 
     @Override
@@ -82,14 +100,28 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void getData() {
-        list.clear();
-        for(int i=0;i<10;i++){
-            GoodsBean goodsBean = new GoodsBean();
-            goodsBean.setNumber("2");
-            goodsBean.setSpareName("神奇四维空间兜");
-            goodsBean.setSpecifications("白色");
-            list.add(goodsBean);
-        }
-       quickAdapter.notifyDataSetChanged();
+        showProgressDialog("通信中");
+        PickDetailRequest pickDetailRequest = new PickDetailRequest();
+        pickDetailRequest.setPickId(getIntent().getStringExtra("PickId"));
+        pickDetailRequest.setToken(ThokApplication.requestToken);
+        OkGo.<PickDetailResponse>post(RequestURLs.getUrlSparePickDetail())
+                .tag(this)
+                .upJson(pickDetailRequest.toJsonString())
+                .execute(new OkGoJsonCallback<PickDetailResponse>() {
+                    @Override
+                    public void onErrorMessage(String str, int code) {
+                       hidtProgressDialog();
+                        Toast.makeText(GoodsInfoActivity.this,str,Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onSuccess(Response<PickDetailResponse> response) {
+                        hidtProgressDialog();
+                        list.clear();
+                        response.body().getData().getDetails().forEach((obj)-> list.add(obj));
+                        quickAdapter.notifyDataSetChanged();
+                    }
+                });
+
     }
 }

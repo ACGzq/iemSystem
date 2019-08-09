@@ -1,11 +1,13 @@
 package com.thok.iem.ui;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,24 +24,32 @@ import com.thok.iem.BuildConfig;
 import com.thok.iem.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BaseActivity extends AppCompatActivity {
 public static ArrayList<Activity> activityArrayList = new ArrayList<>();
     public static final  String TASK_TYPE = "TASK_TYPE";
     public static final  String KEY_WORD_SEEK = "KEY_WORD_SEEK";
-    public static final  String INQUIRY_RESULT_DATA = "INQUIRY_RESULT_DATA";
+    public static final  String INQUIRY_RESULT_DATA_NAME = "INQUIRY_RESULT_DATA_NAME";
+    public static final  String INQUIRY_RESULT_DATA_SPECIFICATIONS = "INQUIRY_RESULT_DATA_NAME_SPECIFICATIONS";
+    public static final  String INQUIRY_RESULT_DATA_NUMBER = "INQUIRY_RESULT_DATA_NAME_NUMBER";
+    public static final  String INQUIRY_RESULT_DATA_ID = "INQUIRY_RESULT_DATA_NAME_ID";
     public static final String INTENT_FILTER_ACTION = "com.thok.iem.action";
     public static final String LAST_LOGIN_USER_ID = "LAST_LOGIN_USER_ID";
+    public static final int TASK_PERMISSION_REQUEST = 1314;
+    public static final int TASK_QR_SCANER = 10;
     public static final int TASK_DONE = 6666;
     public static final int TASK_CANCEL = 7777;
     public static final int FINISH_APP = 4321;
-    public static final  int TASK_RPAIR_REQUEST = 1001;
-    public static final  int TASK_RPAIR_REPORT = 1002;
+    public static final  int TASK_REPAIR_REQUEST = 1001;
+    public static final  int TASK_REPAIR_REPORT = 1002;
     public static final  int TASK_MAINTAIN = 1003;
     public static final  int TASK_PATROL = 1004;
     public static final  int TASK_MATERIAL_APPLY = 1005;
     public static final  int TASK_SEEK_GOODS = 1006;
     public static final  int ON_ITEM_SELECTED = 1007;
+    public static final  int TASK_SEARCH_REPAIR = 1008;
+    protected static HashMap<String,String> dicMap;
     protected   String tag = "";
     protected PopupWindow popupWindow;
     protected ProgressDialog mProgressDialog;
@@ -118,6 +128,9 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
         }
         // 如果焦点不是EditText则忽略
         return false;
+    }
+    protected void compelLogOut(){
+        new AlertDialog.Builder(this).setTitle("token过期，必须重新登录").setNegativeButton("确定",(dialog,witch)->removeAllActivity()).show();
     }
     /**
      * 获取InputMethodManager，隐藏软键盘

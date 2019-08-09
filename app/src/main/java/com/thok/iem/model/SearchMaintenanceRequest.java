@@ -1,27 +1,25 @@
 package com.thok.iem.model;
 
 public class SearchMaintenanceRequest extends BaseRequest {
-
     /**
      * deviceName : 堆垛机
-     * deviceNum : 45612345
-     * maintenancer : 陈智斌
+     * deviceNo : ddsfsafaf
+     * imgUrl : /
+     * pageNo : 1
+     * pageSize : 20
+     * position : {1,2}
+     * specificationType : {}
+     * statusId : 0
      */
 
     private String deviceName;
-    private String deviceNum;
-    private String maintenancer;
-
-    public SearchMaintenanceRequest() {}
-    public SearchMaintenanceRequest(String token) {
-        super(token);
-    }
-    public SearchMaintenanceRequest(String deviceName, String deviceNum, String maintenancer,String token) {
-        super(token);
-        this.deviceName = deviceName;
-        this.deviceNum = deviceNum;
-        this.maintenancer = maintenancer;
-    }
+    private String deviceNo;
+    private String imgUrl;
+    private String pageNo;
+    private String pageSize;
+    private String position;
+    private String specificationType;
+    private String statusId;
 
     public String getDeviceName() {
         return deviceName;
@@ -31,19 +29,59 @@ public class SearchMaintenanceRequest extends BaseRequest {
         this.deviceName = deviceName;
     }
 
-    public String getDeviceNum() {
-        return deviceNum;
+    public String getDeviceNo() {
+        return deviceNo;
     }
 
-    public void setDeviceNum(String deviceNum) {
-        this.deviceNum = deviceNum;
+    public void setDeviceNo(String deviceNo) {
+        this.deviceNo = deviceNo;
     }
 
-    public String getMaintenancer() {
-        return maintenancer;
+    public String getImgUrl() {
+        return imgUrl;
     }
 
-    public void setMaintenancer(String maintenancer) {
-        this.maintenancer = maintenancer;
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    public String getPageNo() {
+        return pageNo;
+    }
+
+    public void setPageNo(String pageNo) {
+        this.pageNo = pageNo;
+    }
+
+    public String getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(String pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getSpecificationType() {
+        return specificationType;
+    }
+
+    public void setSpecificationType(String specificationType) {
+        this.specificationType = specificationType;
+    }
+
+    public String getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(String statusId) {
+        this.statusId = statusId;
     }
 }

@@ -54,9 +54,9 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
         ViewHolder holder = null;
 
         if (convertView==null){
-            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_with_title,null);
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item,null);
             holder = new ViewHolder();
-            holder.value = convertView.findViewById(R.id.item_text);
+            holder.value = convertView.findViewById(R.id.item1);
             convertView.setTag(holder);
 
         }else {

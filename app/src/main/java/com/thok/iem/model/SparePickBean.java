@@ -1,12 +1,10 @@
 package com.thok.iem.model;
 
-public class Component {
-    public static final String KEY_WORD_COMPONENT_NAME = "KEY_WORD_COMPONENT_NAME";
-    public static final String KEY_WORD_MODEL_TYPE = "KEY_WORD_MODEL_TYPE";
-    public static final String KEY_WORD_AMOUNT = "KEY_WORD_AMOUNT";
+public class SparePickBean {
+    private String id;
     private String componentName;
     private String  modelType;
-    private int amount;
+    private int number;
 
     public String getEqiopmentName() {
 
@@ -25,11 +23,19 @@ public class Component {
         this.modelType = modelType;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getNumber() {
+        return number;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

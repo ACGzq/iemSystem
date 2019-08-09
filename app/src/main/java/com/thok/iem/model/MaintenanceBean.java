@@ -3,43 +3,93 @@ package com.thok.iem.model;
 public class MaintenanceBean {
 
     /**
-     * changeDays : 2周
-     * days : 1年
-     * deviceName : 堆垛机
+     * id : 1cd73fe143d64117a98889e02b67b001
+     * userId : null
+     * userName : null
+     * createBy : null
+     * createTime : 2019-07-18 17:29:23
+     * lastModifyBy : null
+     * lastModifyTime : 2019-07-18 17:29:23
      * deviceNum : 45612345
-     * maintenancer : 陈智斌
-     * progrem : 治病项目
+     * deviceName : 堆垛机
+     * progrem : 设备项目
+     * days : 1年
+     * changeDays : 2周
+     * maintenancer : 小白
+     * dr : null
+     * status : 0
      */
 
-    private String changeDays;
-    private String days;
-    private String deviceName;
+    private String id;
+    private Object userId;
+    private Object userName;
+    private Object createBy;
+    private String createTime;
+    private Object lastModifyBy;
+    private String lastModifyTime;
     private String deviceNum;
-    private String maintenancer;
+    private String deviceName;
     private String progrem;
+    private String days;
+    private String changeDays;
+    private String maintenancer;
+    private Object dr;
+    private int status;
 
-    public String getChangeDays() {
-        return changeDays;
+    public String getId() {
+        return id;
     }
 
-    public void setChangeDays(String changeDays) {
-        this.changeDays = changeDays;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getDays() {
-        return days;
+    public Object getUserId() {
+        return userId;
     }
 
-    public void setDays(String days) {
-        this.days = days;
+    public void setUserId(Object userId) {
+        this.userId = userId;
     }
 
-    public String getDeviceName() {
-        return deviceName;
+    public Object getUserName() {
+        return userName;
     }
 
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
+    public void setUserName(Object userName) {
+        this.userName = userName;
+    }
+
+    public Object getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(Object createBy) {
+        this.createBy = createBy;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public Object getLastModifyBy() {
+        return lastModifyBy;
+    }
+
+    public void setLastModifyBy(Object lastModifyBy) {
+        this.lastModifyBy = lastModifyBy;
+    }
+
+    public String getLastModifyTime() {
+        return lastModifyTime;
+    }
+
+    public void setLastModifyTime(String lastModifyTime) {
+        this.lastModifyTime = lastModifyTime;
     }
 
     public String getDeviceNum() {
@@ -50,12 +100,12 @@ public class MaintenanceBean {
         this.deviceNum = deviceNum;
     }
 
-    public String getMaintenancer() {
-        return maintenancer;
+    public String getDeviceName() {
+        return deviceName;
     }
 
-    public void setMaintenancer(String maintenancer) {
-        this.maintenancer = maintenancer;
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getProgrem() {
@@ -64,5 +114,45 @@ public class MaintenanceBean {
 
     public void setProgrem(String progrem) {
         this.progrem = progrem;
+    }
+
+    public String getDays() {
+        return days;
+    }
+
+    public void setDays(String days) {
+        this.days = days;
+    }
+
+    public String getChangeDays() {
+        return changeDays;
+    }
+
+    public void setChangeDays(String changeDays) {
+        this.changeDays = changeDays;
+    }
+
+    public String getMaintenancer() {
+        return maintenancer;
+    }
+
+    public void setMaintenancer(String maintenancer) {
+        this.maintenancer = maintenancer;
+    }
+
+    public Object getDr() {
+        return dr;
+    }
+
+    public void setDr(Object dr) {
+        this.dr = dr;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

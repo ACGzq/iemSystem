@@ -7,18 +7,26 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.thok.iem.R;
+import com.thok.iem.httpUtil.RequestURLs;
 import com.thok.iem.model.UserBean;
 import com.thok.iem.ui.AlterPassActivity;
 import com.thok.iem.ui.BaseActivity;
+import com.thok.iem.ui.HomeActivity;
 import com.thok.iem.utils.DataBaseHelp;
 import com.thok.iem.utils.SharedPreferencesUtil;
+
+import java.util.Date;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,7 +53,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
     private TextView createTimeText;
     private String userID;
     private String passWord;
-
     public MyFragment() {
         // Required empty public constructor
     }
@@ -94,7 +101,6 @@ public class MyFragment extends BaseFragment implements View.OnClickListener {
         Cursor cursor = dataBaseHelp.getReadableDatabase().rawQuery("select * from UserBean where id=?",new String[]{userID});
         printLog(getBaseTag(),"getCount = "+cursor.getCount());
         if(cursor.moveToFirst()){
-
             userAccountText.setText(cursor.getString(cursor.getColumnIndex("userName")));
             userNameText.setText(cursor.getString(cursor.getColumnIndex("realName")));
             passWord = cursor.getString(cursor.getColumnIndex("password"));

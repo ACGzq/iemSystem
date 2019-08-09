@@ -2,21 +2,24 @@ package com.thok.iem.model;
 
 public class DeviceBean {
 
-
     /**
-     * id : 9f329642e5404a72bc4e63ac6275132a
-     * deviceNo : YCDEVICE2019061005242900005
+     * id : 23666baabf88496892300d487d863719
+     * deviceNo : YCDEVICE2019072305054100001
      * deviceName : 堆垛机
-     * specificationType : {}
-     * position : {1,2}
+     * specificationType : 暂无型号
+     * position : d2c36752e4ff49c8950649295908822f
      * imgUrl : /
-     * status : 0
-     * createBy : null
-     * createTime : 2019-06-10T17:24:29.000+0000
-     * updateTime : 2019-06-10T17:24:29.000+0000
+     * statusId : f48a18e15bf64802a723722fa2147275
+     * buyTime : 2019-07-30 17:19:39
+     * createBy : xiaoming
+     * createTime : 2019-07-24 01:05:42
+     * updateTime : 2019-07-30 17:19:39
      * dr : 0
-     * codeImgUrl : http://192.168.1.102:8088/img/code/YCDEVICE2019061005242900005.jpg
-     * buyingTime : 2019-05-10T07:44:15.000+0000
+     * codeImgUrl : http://192.168.1.102:8088/img/code/YCDEVICE2019072305054100001.jpg
+     * positionName : 一层11号11
+     * statusName : 运行
+     * repairCount : 0
+     * pollingCount : 0
      */
 
     private String id;
@@ -25,13 +28,17 @@ public class DeviceBean {
     private String specificationType;
     private String position;
     private String imgUrl;
-    private int status;
-    private Object createBy;
+    private String statusId;
+    private String buyTime;
+    private String createBy;
     private String createTime;
     private String updateTime;
     private int dr;
     private String codeImgUrl;
-    private String buyingTime;
+    private String positionName;
+    private String statusName;
+    private int repairCount;
+    private int pollingCount;
 
     public String getId() {
         return id;
@@ -81,19 +88,27 @@ public class DeviceBean {
         this.imgUrl = imgUrl;
     }
 
-    public int getStatus() {
-        return status;
+    public String getStatusId() {
+        return statusId;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setStatusId(String statusId) {
+        this.statusId = statusId;
     }
 
-    public Object getCreateBy() {
+    public String getBuyTime() {
+        return buyTime;
+    }
+
+    public void setBuyTime(String buyTime) {
+        this.buyTime = buyTime;
+    }
+
+    public String getCreateBy() {
         return createBy;
     }
 
-    public void setCreateBy(Object createBy) {
+    public void setCreateBy(String createBy) {
         this.createBy = createBy;
     }
 
@@ -129,11 +144,35 @@ public class DeviceBean {
         this.codeImgUrl = codeImgUrl;
     }
 
-    public String getBuyingTime() {
-        return buyingTime;
+    public String getPositionName() {
+        return positionName;
     }
 
-    public void setBuyingTime(String buyingTime) {
-        this.buyingTime = buyingTime;
+    public void setPositionName(String positionName) {
+        this.positionName = positionName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public int getRepairCount() {
+        return repairCount;
+    }
+
+    public void setRepairCount(int repairCount) {
+        this.repairCount = repairCount;
+    }
+
+    public int getPollingCount() {
+        return pollingCount;
+    }
+
+    public void setPollingCount(int pollingCount) {
+        this.pollingCount = pollingCount;
     }
 }

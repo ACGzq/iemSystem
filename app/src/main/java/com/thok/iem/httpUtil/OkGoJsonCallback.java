@@ -1,6 +1,8 @@
 package com.thok.iem.httpUtil;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -14,6 +16,7 @@ import com.thok.iem.model.BaseResponse;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
@@ -23,11 +26,23 @@ import okhttp3.ResponseBody;
 public abstract class OkGoJsonCallback<T extends BaseResponse> extends AbsCallback<T> {
     private Type type;
     private Class clazz;
+    private SwipeRefreshLayout swipeRefreshLayout;
     public OkGoJsonCallback(){}
+    public OkGoJsonCallback(SwipeRefreshLayout swipeRefreshLayout){
+        this.swipeRefreshLayout = swipeRefreshLayout;
+    }
     public OkGoJsonCallback(Type type){
         this.type = type;
     }
     public OkGoJsonCallback(Class<T> clazz){
+        this.clazz = clazz;
+    }
+    public OkGoJsonCallback(Type type,SwipeRefreshLayout swipeRefreshLayout){
+        this(swipeRefreshLayout);
+        this.type = type;
+    }
+    public OkGoJsonCallback(Class<T> clazz,SwipeRefreshLayout swipeRefreshLayout){
+        this(swipeRefreshLayout);
         this.clazz = clazz;
     }
 
@@ -50,9 +65,29 @@ public abstract class OkGoJsonCallback<T extends BaseResponse> extends AbsCallba
             data = gson.fromJson(jsonReader,type);
         }
         if(data.getCode()!= 0){
-            throw new IllegalStateException("code = "+data.getCode()+";massage = "+ data.getMessage());
+            if(data.getCode() == -100400){
+                throw new WindowManager.BadTokenException(data.getCode()+"_"+ data.getMessage());
+            }else{
+                throw new IllegalStateException(data.getCode()+"_"+ data.getMessage());
+            }
         }
         return data;
+    }
+
+    @Override
+    public void onStart(Request<T, ? extends Request> request) {
+        if(swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()){
+            swipeRefreshLayout.setRefreshing(true);
+        }
+        super.onStart(request);
+    }
+
+    @Override
+    public void onFinish() {
+        if(swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()){
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        super.onFinish();
     }
 
     @Override
@@ -66,6 +101,10 @@ public abstract class OkGoJsonCallback<T extends BaseResponse> extends AbsCallba
             onErrorMessage("网络请求超时",ErrCode.NetworkTimeOut);
         }else if(exception instanceof HttpException){
             onErrorMessage("服务器异常",ErrCode.NetworkErr);
+        }else if(exception instanceof ConnectException){
+            onErrorMessage("网络连接失败",ErrCode.ConnectException);
+        }else if(exception instanceof WindowManager.BadTokenException){
+            onErrorMessage(exception.getMessage(),ErrCode.tokenExpired);
         }else if(exception instanceof IllegalStateException){
             onErrorMessage(exception.getMessage(),ErrCode.IllegalStateErr);
         }else if(exception instanceof JsonIOException){

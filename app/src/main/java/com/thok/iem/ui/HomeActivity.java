@@ -1,30 +1,53 @@
 package com.thok.iem.ui;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.model.Response;
 import com.thok.iem.R;
 
+import com.thok.iem.ThokApplication;
+import com.thok.iem.httpUtil.ErrCode;
+import com.thok.iem.httpUtil.OkGoJsonCallback;
+import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.DicTypeRequest;
+import com.thok.iem.model.DicTypeResponse;
 import com.thok.iem.ui.fragmentviewmodel.EquipmentInfoFragment;
 import com.thok.iem.ui.fragmentviewmodel.HomePageFragment;
 import com.thok.iem.ui.fragmentviewmodel.MyFragment;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentInteractionListener,EquipmentInfoFragment.OnListFragmentInteractionListener {
 
@@ -98,6 +121,10 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
         i.putExtra(extraData, "ENABLE_PLUGIN");
         // send the intent to DataWedge
         sendBroadcast(i);
+        DicTypeRequest dicTypeRequest = new DicTypeRequest();
+        dicTypeRequest.setToken(ThokApplication.requestToken);
+        dicTypeRequest.setDicType("SBZT0001");
+        initDicData(RequestURLs.getUrlDicTypeList(),dicTypeRequest.toJsonString());
     }
 
     @Override
@@ -133,7 +160,6 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
 
     @Override
     protected void onDestroy() {
-
         super.onDestroy();
     }
     @Override
@@ -151,23 +177,27 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
     }
 
     @Override
+    public void compelLogOut() {
+        super.compelLogOut();
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         printLog("iem_homeActivity","toString = "+event.toString()+"_getCharacters = "+event.getCharacters());
         return super.onKeyDown(keyCode, event);
     }
 
-    public void hideAllFragement(){
+    public void removeAllFragement(){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if(homeFragment != null){
-            transaction.hide(homeFragment);
+            transaction.remove(homeFragment);
         }
         if(equipentInfoFragment != null){
-            transaction.hide(equipentInfoFragment);
+            transaction.remove(equipentInfoFragment);
         }
         if(myFragment != null){
-            transaction.hide(myFragment);
+            transaction.remove(myFragment);
         }
-
         transaction.commit();
 
     }
@@ -177,6 +207,84 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
         printLog("iem_homeActivity","intent="+intent.toString()+"_="+intent.getStringExtra("com.symbol.datawedge.data_string"));
         super.onNewIntent(intent);
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == TASK_PERMISSION_REQUEST){
+            boolean flag = true;
+            int i = 0;
+            while (flag && i<grantResults.length){
+                flag = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                i++;
+            }
+            if(flag){
+                startQrScan();
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == TASK_QR_SCANER && data!=null){
+            Bundle bundle = data.getExtras();
+            if (bundle == null) {
+                printLog(tag,"nothing");
+                return;
+            }
+            ((EquipmentInfoFragment)equipentInfoFragment).updataUi(bundle.getString(CodeUtils.RESULT_STRING));
+        }else{
+            printLog(tag,"nothing");
+        }
+    }
+
+    public void startQrScan(){
+        if(PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)){
+            Intent intent = new Intent(this, CaptureActivity.class);
+            startActivityForResult(intent, BaseActivity.TASK_QR_SCANER);
+        }else{
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},BaseActivity.TASK_PERMISSION_REQUEST);
+        }
+    }
+    public void initDicData(String url, String jsonParams){
+        showProgressDialog("初始化");
+        OkGo.<DicTypeResponse>post(url)
+                .upJson(jsonParams)
+                .execute(new OkGoJsonCallback<DicTypeResponse>() {
+                    @Override
+                    public void onErrorMessage(String str, int code) {
+                        hidtProgressDialog();
+                        if(code == ErrCode.tokenExpired){
+                            compelLogOut();
+                        }else{
+                            //itemList.add("无数据");
+                            dicMap = new HashMap<>();
+                            dicMap.put("无数据","nothing");
+                        }
+                    }
+                    @Override
+                    public void onSuccess(Response<DicTypeResponse> response) {
+                        hidtProgressDialog();
+                        DicTypeResponse dicTypeResponse = response.body();
+                        DicTypeResponse.DataBean dataBean = dicTypeResponse.getData();
+                        if(dataBean!=null){
+                            List<DicTypeResponse.DataBean.ListBean> listBeans = dataBean.getList();
+                            //status_title.setText(dataBean.getTypeDic().getName());
+                            if(listBeans!=null && listBeans.size()>0){
+                                //itemList.clear();
+                                dicMap = new HashMap<>();
+                                dicMap.clear();
+                                listBeans.forEach((listBean ->  {
+                                    //itemList.add(listBean.getName());
+                                    dicMap.put(listBean.getName(),listBean.getId());
+                                }));
+                            }
+                        }
+                    }
+                });
+    }
+    public void hideKeyboard(IBinder token){
+            super.hideKeyboard(token);
+}
 
     private void switchFragment(Fragment targetFragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -196,7 +304,6 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
         }
         currentFragment = targetFragment;
     }
-
         @Override
     public void onFragmentInteraction(Uri uri) {
 
@@ -224,4 +331,5 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
             }
         }
     };
+
 }

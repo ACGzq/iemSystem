@@ -78,6 +78,7 @@
                 </LinearLayout>
                 <TextView
                     android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/equipment_info"
                     android:text="@string/thok_equipment_no"
                     android:textColor="@color/text_color_black"
@@ -98,7 +99,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <LinearLayout
-                    android:layout_margin="10dp"
+                    android:id="@+id/status_item"
+                    android:layout_margin="5dp"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
@@ -140,7 +142,7 @@
                     </LinearLayout>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_margin="10dp"
+                    android:layout_margin="5dp"
                     android:id="@+id/repair_time"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
@@ -183,7 +185,7 @@
                 </LinearLayout>
             </LinearLayout>
                 <LinearLayout
-                    android:layout_margin="10dp"
+                    android:layout_margin="5dp"
                     android:id="@+id/request_time"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal"
@@ -226,7 +228,7 @@
                     </LinearLayout>
                 </LinearLayout>
             <LinearLayout
-                android:layout_margin="10dp"
+                android:layout_margin="5dp"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -253,15 +255,13 @@
                     android:text=""/>
             </LinearLayout>
             <LinearLayout
-                android:layout_margin="10dp"
+                android:layout_margin="5dp"
                 android:id="@+id/input_layout2"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:stretchColumns = "1"
-                >
-
+                android:stretchColumns = "1">
                 <TextView
                     android:id="@+id/input_title2"
                     android:layout_width="0dp"
@@ -282,7 +282,7 @@
                     android:text=""/>
             </LinearLayout>
             <LinearLayout
-                android:layout_margin="10dp"
+                android:layout_margin="5dp"
                 android:id="@+id/input_layout3"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
@@ -310,7 +310,7 @@
                     android:text=""/>
             </LinearLayout>
             <LinearLayout
-                android:layout_margin="10dp"
+                android:layout_margin="5dp"
                 android:id="@+id/input_layout4"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"

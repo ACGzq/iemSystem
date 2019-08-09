@@ -224,7 +224,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             LoginRequest loginRequest = new LoginRequest();
             loginRequest.setUserName(account);
             loginRequest.setPassWord(password);
-            OkGo.<LoginResponse>post(RequestURLs.URL_LOGIN)
+            OkGo.<LoginResponse>post(RequestURLs.getUrlLogin())
                     .tag(this)
                     .upJson(new Gson().toJson(loginRequest))
             .execute(new OkGoJsonCallback<LoginResponse>() {
@@ -238,6 +238,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     UserBean userBean = response.body().getData();
                     userBean.setPassword(password);
                     ThokApplication.requestToken = userBean.getToken();
+                    ThokApplication.userName = userBean.getRealName();
+                    ThokApplication.realName = userBean.getRealName();
                     DataBaseHelp dbHelp = new DataBaseHelp(LoginActivity.this,UserBean.class);
                     SQLiteDatabase readable = dbHelp.getReadableDatabase();
                     Cursor cursor = readable.rawQuery("select * from UserBean where id=?",new String[]{userBean.getId()});

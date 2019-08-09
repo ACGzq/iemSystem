@@ -6,6 +6,7 @@ public class AddRepairDeviceRequest extends BaseRequest {
      * content : 设备运行出现响声，时断时续
      * deviceId : asfdsajkkl
      * dicId : alsjfdljlaldsl21
+     * dicName : 运行中
      * reportTime : 2019-06-14 14:25:31
      * reportUser : 赵六
      */
@@ -13,6 +14,7 @@ public class AddRepairDeviceRequest extends BaseRequest {
     private String content;
     private String deviceId;
     private String dicId;
+    private String dicName;
     private String reportTime;
     private String reportUser;
 
@@ -38,6 +40,14 @@ public class AddRepairDeviceRequest extends BaseRequest {
 
     public void setDicId(String dicId) {
         this.dicId = dicId;
+    }
+
+    public String getDicName() {
+        return dicName;
+    }
+
+    public void setDicName(String dicName) {
+        this.dicName = dicName;
     }
 
     public String getReportTime() {

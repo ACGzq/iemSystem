@@ -1,16 +1,18 @@
 package com.thok.iem.ui.fragmentviewmodel;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,21 +20,28 @@ import android.widget.ImageView;
 import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 
 import com.lzy.okgo.model.Response;
-import com.lzy.okgo.request.base.Request;
 import com.thok.iem.R;
+import com.thok.iem.ThokApplication;
+import com.thok.iem.httpUtil.ErrCode;
 import com.thok.iem.httpUtil.ImageRequest;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
 import com.thok.iem.httpUtil.RequestURLs;
-import com.thok.iem.model.BaseRequest;
 import com.thok.iem.model.DeviceBean;
 import com.thok.iem.model.DevicesResponse;
+import com.thok.iem.model.DicTypeRequest;
+import com.thok.iem.model.DicTypeResponse;
 import com.thok.iem.model.SearchDeviceRequest;
+import com.thok.iem.ui.BaseActivity;
+import com.thok.iem.ui.HomeActivity;
 import com.thok.iem.utils.QuickAdapter;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -54,6 +63,7 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
     boolean flag;
     private SearchView input_edit;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private HashMap<String,String> dicMap = new HashMap<>();
     private String equipmentInfoString = "设备编号:%s %n规格型号: %s %n存放位置:%s %n设备状态:%s";
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -100,17 +110,31 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
         adapter = new QuickAdapter<DeviceBean>(list) {
             @Override
             public int getLayoutId(int viewType) {
-                return R.layout.list_item_with_image;
+                return viewType==1?R.layout.list_item_with_image:R.layout.list_item_with_title;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return list.get(position).getDr() == -100?0:1;
             }
 
             @Override
             public void convert(QuickVH holder, DeviceBean data, int position) {
-                holder.setText(R.id.item_title,data.getDeviceName());
-                holder.setText(R.id.item_text,String.format(equipmentInfoString,data.getDeviceNo(),data.getSpecificationType(),data.getPosition(),data.getStatus()==0?"运行":"停机"));
-                holder.setText(R.id.state_text,data.getStatus()==0?"运行":"停机");
-                ImageRequest.getRequest(context).getImage(data.getImgUrl(),holder.getView(R.id.img_view));
+                if(data.getDr() == -100){
+                    holder.setText(R.id.item_text,"点击获取更多");
+                    holder.getView(R.id.item_title).setVisibility(View.GONE);
+                    holder.getConvertView().setTag("get_more");
+                }else{
+                    holder.getConvertView().setTag("default");
+                    holder.setText(R.id.item_title,data.getDeviceName());
+                    holder.setText(R.id.item_text,String.format(equipmentInfoString,data.getDeviceNo(),data.getSpecificationType(),data.getPositionName(),dicMap.get(data.getStatusId())));
+                    holder.setText(R.id.state_text,dicMap.get(data.getStatusId()));
+                    ImageRequest.getRequest(context).loadImage(data.getImgUrl(),holder.getView(R.id.img_view),3);
+                }
+
 
             }
+
 
             @Override
             public void onBindViewHolder(@NonNull QuickVH viewHolder, int i) {
@@ -120,8 +144,12 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
         adapter.setOnItemClickListener(new QuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Toast.makeText(context,"第"+position+"项",Toast.LENGTH_SHORT).show();
-                printLog("iem_EqInfoFragment","position="+position);
+                //Toast.makeText(context,"第"+position+"项",Toast.LENGTH_SHORT).show();
+                printLog("iem_EqInfoFragment","position="+position + "Tag ="+view.getTag());
+                if("get_more".equals(view.getTag())){
+                    list.remove(list.size()-1);
+                    search(input_edit.getQuery().toString(),list.size()/10+1);
+                }
             }
 
             @Override
@@ -130,10 +158,39 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
             }
         });
         recyclerView.setAdapter(adapter);
-
         return rootView;
     }
+    public void initDicDataAndSearch(String keyWord,int page){
+        DicTypeRequest dicTypeRequest = new DicTypeRequest();
+        dicTypeRequest.setToken(ThokApplication.requestToken);
+        dicTypeRequest.setDicType("SBZT0001");
 
+        OkGo.<DicTypeResponse>post(RequestURLs.getUrlDicTypeList())
+                .upJson(dicTypeRequest.toJsonString())
+                .execute(new OkGoJsonCallback<DicTypeResponse>(swipeRefreshLayout) {
+                    @Override
+                    public void onErrorMessage(String str, int code) {
+                        printLog(getBaseTag(),str);
+                        search(keyWord,page);
+                    }
+                    @Override
+                    public void onSuccess(Response<DicTypeResponse> response) {
+                        DicTypeResponse dicTypeResponse = response.body();
+                        DicTypeResponse.DataBean dataBean = dicTypeResponse.getData();
+                        if(dataBean!=null){
+                            List<DicTypeResponse.DataBean.ListBean> listBeans = dataBean.getList();
+                            if(listBeans!=null && listBeans.size()>0){
+                                dicMap.clear();
+                                listBeans.forEach((listBean ->  {
+                                    dicMap.put(listBean.getId(),listBean.getName());
+                                }));
+                                printLog("dicMap",dicMap.toString());
+                                search(keyWord,page);
+                            }
+                        }
+                    }
+                });
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -170,49 +227,50 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
 
         }
     }
-
     public void search(String keyWord){
-        list.clear();
+        search(keyWord,0);
+    }
+    public void search(String keyWord,int page){
+        if(dicMap == null || dicMap.size()<1){
+            initDicDataAndSearch(keyWord,page);
+            return;
+        }
+       // list.clear();
         printLog("iem_EqInfoFragment","search");
         String jsonParamsStr;
-        String url;
-        if(TextUtils.isEmpty(keyWord)){
-            BaseRequest baseRequest = new BaseRequest();
-            baseRequest.setId("10");
-            baseRequest.setToken("1");
-            jsonParamsStr = baseRequest.toJsonString();
-            url = RequestURLs.URL_FIND_DEVICE;
-        }else{
-            SearchDeviceRequest sdrBean = new SearchDeviceRequest();
-            sdrBean.setDeviceName("堆垛机");
-            sdrBean.setDeviceNum(keyWord);
-            sdrBean.setToken("1");
-            jsonParamsStr = sdrBean.toJsonString();
-            url = RequestURLs.URL_SEARCH_DEVICE;
+        String url = RequestURLs.getUrlSearchpageDevice();
+        SearchDeviceRequest searchDeviceRequest = new SearchDeviceRequest();
+        searchDeviceRequest.setToken(ThokApplication.requestToken);
+        if(!TextUtils.isEmpty(keyWord)){
+            searchDeviceRequest.setDeviceNo(keyWord);
         }
+        if(page > 0){
+            searchDeviceRequest.setPageNo(String.valueOf(page));
+        }
+       searchDeviceRequest.setPageSize("10");
+        jsonParamsStr = searchDeviceRequest.toJsonString();
         OkGo.<DevicesResponse>post(url)
                 .tag(this)
                 .upJson(jsonParamsStr)
-                .execute(new OkGoJsonCallback<DevicesResponse>() {
-                    @Override
-                    public void onStart(Request<DevicesResponse, ? extends Request> request) {
-                        printLog("iem_EqInfoFragment", "onStart");
-                        if(!swipeRefreshLayout.isRefreshing()){
-                            swipeRefreshLayout.setRefreshing(true);
-                        }
-                    }
-
+                .execute(new OkGoJsonCallback<DevicesResponse>(swipeRefreshLayout) {
                     @Override
                     public void onSuccess(Response<DevicesResponse> response) {
                         DevicesResponse devices = response.body();
                         printLog("iem_EqInfoFragment", "onSuccess: "+response.body());
                         List<DeviceBean> deviceList = devices.getData();
                         if(deviceList!=null){
-                            list.clear();
+                            if(page<1){
+                                list.clear();
+                            }
                             for(DeviceBean deviceBean:deviceList){
                                 list.add(deviceBean);
                             }
-                            adapter.notifyDataSetChanged();
+                            if(response.body().getTotalCount()>10 && page<response.body().getTotalPage()){
+                                DeviceBean deviceBean = new DeviceBean();
+                                deviceBean.setDr(-100);
+                                list.add(deviceBean);
+                            }
+                            adapter.notifyItemRangeChanged(list.size()-deviceList.size(),deviceList.size());
                         }
                     }
 
@@ -223,17 +281,10 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
 
                     @Override
                     public void onErrorMessage(String str,int code) {
-                        if (swipeRefreshLayout.isRefreshing()){
-                            swipeRefreshLayout.setRefreshing(false);
-                        }
-                        Toast.makeText(context,str,Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        printLog("iem_EqInfoFragment", "onFinish");
-                        if (swipeRefreshLayout.isRefreshing()){
-                            swipeRefreshLayout.setRefreshing(false);
+                        if(code == ErrCode.tokenExpired){
+                            ((HomeActivity)getActivity()).compelLogOut();
+                        }else{
+                            Toast.makeText(context,str,Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -247,17 +298,20 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
 
     }
     public void startSoftScan(){
-        flag = true;
-        Intent i = new Intent();
-        String softScanTrigger = "com.symbol.datawedge.api.ACTION_SOFTSCANTRIGGER";
-        String extraData = "com.symbol.datawedge.api.EXTRA_PARAMETER";
-        // set the action to perform
-        i.setAction(softScanTrigger);
-        // add additional info
-        i.putExtra(extraData, flag?"START_SCANNING":"TOGGLE_SCANNING");
-        printLog(getTag(),"startSoftScan");
-        getActivity().sendBroadcast(i);
-
+        if(ThokApplication.isPhone){
+            ((HomeActivity)getActivity()).startQrScan();
+        }else{
+            flag = true;
+            Intent i = new Intent();
+            String softScanTrigger = "com.symbol.datawedge.api.ACTION_SOFTSCANTRIGGER";
+            String extraData = "com.symbol.datawedge.api.EXTRA_PARAMETER";
+            // set the action to perform
+            i.setAction(softScanTrigger);
+            // add additional info
+            i.putExtra(extraData, flag?"START_SCANNING":"TOGGLE_SCANNING");
+            printLog(getTag(),"startSoftScan");
+            getActivity().sendBroadcast(i);
+        }
     }
 
     @Override
@@ -289,7 +343,13 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
     }
 
     public void updataUi(String str){
-        input_edit.setQuery(str,true);
+        DeviceBean deviceBean = new Gson().fromJson(str,DeviceBean.class);
+        if(deviceBean!=null){
+            input_edit.setQuery(deviceBean.getDeviceNo(),true);
+        }else{
+            input_edit.setQuery(str,true);
+        }
+
     }
     
 }
