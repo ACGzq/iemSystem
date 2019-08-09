@@ -343,6 +343,7 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
     }
 
     public void updataUi(String str){
+        printLog(getTag(),str);
         DeviceBean deviceBean = new Gson().fromJson(str,DeviceBean.class);
         if(deviceBean!=null){
             input_edit.setQuery(deviceBean.getDeviceNo(),true);
