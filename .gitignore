@@ -11,3 +11,5 @@
 .externalNativeBuild
 library/
 picker/
+.svn/
+release/app-release.apk
