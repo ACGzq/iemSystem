@@ -1,6 +1,9 @@
 package com.thok.iem.ui;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,11 +31,13 @@ import android.widget.Toast;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
+import com.thok.iem.LoginActivity;
 import com.thok.iem.R;
 import com.thok.iem.ThokApplication;
 import com.thok.iem.httpUtil.ErrCode;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
 import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.FilterHistory;
 import com.thok.iem.model.GoodsBean;
 import com.thok.iem.model.MaintenanceBean;
 import com.thok.iem.model.MaintenanceResponse;
@@ -45,10 +50,13 @@ import com.thok.iem.model.SearchPageRequest;
 import com.thok.iem.model.SpareBean;
 import com.thok.iem.model.SpareResponse;
 import com.thok.iem.utils.AutoFilterListAdapter;
+import com.thok.iem.utils.DataBaseHelp;
 import com.thok.iem.utils.QuickAdapter;
+import com.thok.iem.utils.SharedPreferencesUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.OnItemClickListener, SearchView.OnQueryTextListener, AdapterView.OnItemClickListener {
@@ -63,12 +71,13 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     private QuickAdapter recycleAdapter;
     private AutoFilterListAdapter historyAdapter;
     private Intent intent;
-    private String[] mStrs = {"ACG00011", "AVG00011", "AVG00112", "BBC12345","TNT23333","FBI WARRING"};
+    private String[] mStrs = {"thok"};
     private ListView mListView;
     private String queryString;
-    private int pageNumber = 0;
-    private int totalPage = 2;
+    private int presentPage = 0;
     private int taskType = 0;
+    private View example_show;
+
     //private boolean needHint = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +92,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         titleView = findViewById(R.id.inquiry_title);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(()-> getData(input_edit.getQuery().toString()));
+        example_show = findViewById(R.id.example_show);
         recyclerView = findViewById(R.id.recycler_view);
         findViewById(R.id.inquiry_button).setOnClickListener((view)->onQueryTextSubmit(input_edit.getQuery().toString()));
         input_edit = findViewById(R.id.input_edit);
@@ -117,14 +127,14 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                     holder.getConvertView().setTag("get_more");
                 }else if(data instanceof MaintenanceBean){
                     holder.setText(R.id.item_text,String.format("设备编号:%s %n保养项目: %s %n保养周期: %s %n更换周期: %s %n养护人: %s %n",
-                            ((MaintenanceBean)data).getDeviceNum()+position,((MaintenanceBean)data).getProgrem(),((MaintenanceBean)data).getDays(),
-                            ((MaintenanceBean)data).getChangeDays(),((MaintenanceBean)data).getMaintenancer()));
+                           getVaule(((MaintenanceBean)data).getDeviceNum()),getVaule(((MaintenanceBean)data).getProgrem()),getVaule(((MaintenanceBean)data).getDays()),
+                            getVaule(((MaintenanceBean)data).getChangeDays()),getVaule(((MaintenanceBean)data).getMaintenancer())));
                     holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
                     holder.setText(R.id.item_title,((MaintenanceBean)data).getDeviceName());
                 }else if(data instanceof SpareBean){
                     holder.setText(R.id.item_text,String.format("备件编号:%s %n备件数量: %s %n规格型号: %s %n计量单位: %s %n供应商: %s %n",
-                            ((SpareBean)data).getSpareNo(),((SpareBean)data).getNumber(),((SpareBean)data).getSpecifications(),
-                            ((SpareBean)data).getUnit(),((SpareBean)data).getSupplier()));
+                            getVaule(((SpareBean)data).getSpareNo()),((SpareBean)data).getNumber(),getVaule(((SpareBean)data).getSpecifications()),
+                            getVaule(((SpareBean)data).getUnit()),getVaule(((SpareBean)data).getSupplier())));
                     holder.getView(R.id.item_title).setVisibility(View.VISIBLE);
                     holder.setText(R.id.item_title,((SpareBean)data).getSpareName());
                 }else if(data instanceof RepairTaskResponse.DataBean){
@@ -206,7 +216,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(taskType != TASK_SEEK_GOODS && taskType != TASK_MAINTAIN && taskType != TASK_SEARCH_REPAIR){
+        if(taskType != TASK_SEEK_GOODS && taskType != TASK_MAINTAIN && taskType != TASK_SEARCH_REPAIR && taskType != TASK_REPAIR_REPORT){
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.action_menu_submit, menu);
             if(getIntent().getIntExtra(TASK_TYPE,0) == TASK_MATERIAL_APPLY){
@@ -248,14 +258,19 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                             @Override
                             public void onSuccess(Response<RepairTaskResponse> response) {
                                     List<RepairTaskResponse.DataBean> dataBeans = response.body().getData();
+                                    saveHistory(str);
                                     if(page<1){
                                         list.clear();
                                     }
+                                    presentPage = response.body().getPageNo();
                                     dataBeans.forEach(dataBean -> list.add(dataBean));
+
                                 if(response.body().getTotalCount()>10 && page<response.body().getTotalPage()){
+
                                     list.add("点击获得更多");
                                 }
-                                recycleAdapter.notifyItemRangeChanged(list.size()-dataBeans.size(),dataBeans.size());
+
+                                recycleAdapter.notifyDataSetChanged();
                             }
                         });
                 break;
@@ -267,13 +282,14 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                 }
                 searchMaintenanceRequest.setPageSize("10");
                 searchMaintenanceRequest.setToken(ThokApplication.requestToken);
-                Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");//是否是数字
+              //  Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");//是否是数字
+                Pattern p = Pattern.compile("[\u4e00-\u9fa5]");//是否有汉字
                 if(TextUtils.isEmpty(str)){
                     Toast.makeText(this,"未检测搜索内容，启用默认搜索",Toast.LENGTH_SHORT).show();
-                }else if(pattern.matcher(str).matches()){
-                    searchMaintenanceRequest.setDeviceNo(str);
-                }else{
+                }else if(p.matcher(str).find()){
                     searchMaintenanceRequest.setDeviceName(str);
+                }else{
+                    searchMaintenanceRequest.setDeviceNo(str);
                 }
                 jsonParamsStr = searchMaintenanceRequest.toJsonString();
 
@@ -292,6 +308,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
                             @Override
                             public void onSuccess(Response<MaintenanceResponse> response) {
+                                saveHistory(str);
                                 List<MaintenanceBean> maintenanceList = response.body().getData();
                                 if(maintenanceList!=null){
                                     if(page<1){
@@ -338,6 +355,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
                             @Override
                             public void onSuccess(Response<SpareResponse> response) {
+                                saveHistory(str);
                                 List<SpareBean> spareList = response.body().getData();
                                 if(spareList!=null){
                                     if(page<1){
@@ -379,6 +397,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
                             @Override
                             public void onSuccess(Response<PickListResponse> response) {
+                                saveHistory(str);
                                 if(page<1){
                                     list.clear();
                                 }
@@ -389,9 +408,10 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                                 recycleAdapter.notifyDataSetChanged();
                             }
                         });
+                break;
             default:
                 list.clear();
-                for(int i=0;i<20;i++){
+                for(int i=0;i<10;i++){
                     MaintenanceBean maintenanceBean = new MaintenanceBean();
                     maintenanceBean.setChangeDays("72");
                     maintenanceBean.setDays("36");
@@ -409,32 +429,41 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         switch (type){
             case TASK_PATROL://设备巡检
             titleView.setText(R.string.thok_patrol);
+            input_edit.setQueryHint("输入设备名称或编号");
             intent = new Intent(this,TaskSubmitActivity.class);
             intent.putExtra(TASK_TYPE,type);
             break;
             case TASK_MATERIAL_APPLY://领料申请
                 titleView.setText(R.string.title_receiving_materials);
                 getData("");
+                input_edit.setQueryHint("输入完整领料单号");
                intent = new Intent(this,GoodsInfoActivity.class);
                intent.putExtra(TASK_TYPE,type);
-
+                if(SharedPreferencesUtil.getInstance(this).getBoolean("is_first_apply"+ThokApplication.userName,true)){
+                    example_show.setVisibility(View.VISIBLE);
+                    findViewById(R.id.example_show).setOnClickListener(v -> {example_show.setVisibility(View.GONE);
+                    SharedPreferencesUtil.getInstance(this).setBoolean("is_first_apply"+ThokApplication.userName,false);});
+                }
                 break;
 
             case TASK_REPAIR_REPORT://维修任务
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
             case TASK_SEARCH_REPAIR:
+                input_edit.setQueryHint("输入设备名称或编号");
                 titleView.setText(R.string.thok_repair_task);
                 getData("");
                 break;
             case TASK_MAINTAIN://保养任务
+                input_edit.setQueryHint("输入设备名称或编号");
                 intent = new Intent(this,TaskSubmitActivity.class);
                 intent.putExtra(TASK_TYPE,type);
                 titleView.setText(R.string.thok_maintain_task);
                 getData("");
                 break;
-            case TASK_SEEK_GOODS://设备选择
-                titleView.setText(R.string.thok_equipment_select);
+            case TASK_SEEK_GOODS://备件选择
+                input_edit.setQueryHint("输入备件名称或编号");
+                titleView.setText("备件选择");
                 findViewById(R.id.input_title).setVisibility(View.VISIBLE);
                 String seek = getIntent().getStringExtra(KEY_WORD_SEEK);
                 printLog(tag,"seek = "+seek);
@@ -448,9 +477,9 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
      * */
     @Override
     public void onItemClick(View view, int position) {
-        if(list.size() == position+1 && list.size()>10){
+        if(list.get(position) instanceof String){
             list.remove(list.size()-1);
-            getData(queryString,list.size()/10+1);
+            getData(queryString,presentPage+1);
         }else if(intent != null){
             intent.putExtra("item",position);
             if(taskType == TASK_REPAIR_REPORT){
@@ -470,14 +499,15 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
                 intent.putExtra("ChangeDays",maintenanceBean.getChangeDays());
             }else if(taskType == TASK_MATERIAL_APPLY){
                 PickListResponse.DataBean dataBean = (PickListResponse.DataBean) list.get(position);
-                intent.putExtra("PickId",dataBean.getId());
-                intent.putExtra("PickNo",dataBean.getPickNo());
-                intent.putExtra("CreateTime",dataBean.getCreateTime());
-                intent.putExtra("PickUser",dataBean.getPickUser());
-                intent.putExtra("RepairId",dataBean.getRepairId());
-                intent.putExtra("RepairUser",dataBean.getRepair().getRepairUser());
-                intent.putExtra("RepairCreateTime",dataBean.getRepair().getCreateTime());
-                intent.putExtra("RepairContent",dataBean.getRepair().getContent());
+                intent.putExtra("PickId",getVaule(dataBean.getId()));
+                intent.putExtra("PickNo",getVaule(dataBean.getPickNo()));
+                intent.putExtra("CreateTime",getVaule(dataBean.getCreateTime()));
+                intent.putExtra("PickUser",getVaule(dataBean.getPickUser()));
+                intent.putExtra("RepairId",getVaule(dataBean.getRepairId()));
+                intent.putExtra("RepairDeviceId",getVaule(dataBean.getRepair().getDeviceId()));
+                intent.putExtra("RepairUser",getVaule(dataBean.getRepair().getRepairUser()));
+                intent.putExtra("RepairCreateTime",getVaule(dataBean.getRepair().getCreateTime()));
+                intent.putExtra("RepairContent",getVaule(dataBean.getRepair().getContent()));
             }
             startActivityForResult(intent,0);
         }else if(taskType == TASK_SEARCH_REPAIR){
@@ -509,6 +539,12 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
 
 
     }
+    private String getVaule(String str){
+        if(TextUtils.isEmpty(str)){
+            str = "(空)";
+        }
+        return str;
+    }
     /**
      * 展示列表的item长点击
      * */
@@ -521,6 +557,8 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
      **/
     @Override
     public boolean onQueryTextSubmit(String s) {
+        //queryString = null;
+        //queryString.equals("ss");
         getData(s);
         mListView.clearTextFilter();
         historyAdapter.getFilter().filter("");
@@ -569,5 +607,27 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         }
         return super.dispatchTouchEvent(ev);
     }
+    public void saveHistory(String str){
+        if(TextUtils.isEmpty(str))
+            return;
+        DataBaseHelp dbHelp = new DataBaseHelp(this, FilterHistory.class);
+        SQLiteDatabase dataBase = dbHelp.getWritableDatabase();
+        dataBase.delete(FilterHistory.class.getSimpleName(),"historyStr like ?",new String[]{str});
+        dataBase.delete(FilterHistory.class.getSimpleName(),"id = ?",new String[]{"10"});
+        ContentValues values = new ContentValues();
+        values.put("historyStr",str);
+        dataBase.insert(FilterHistory.class.getSimpleName(),null,values);
+        SQLiteDatabase readable = dbHelp.getReadableDatabase();
+        Cursor cursor = readable.rawQuery("select * from FilterHistory",new String[]{""});
+        cursor.getCount();
+        if(cursor.moveToFirst()){
+            ArrayList<String> list = new ArrayList<>();
+            list.add(cursor.getString(cursor.getColumnIndex("historyStr")));
+           while (cursor.moveToNext()){
+               list.add(cursor.getString(cursor.getColumnIndex("historyStr")));
+           }
+           historyAdapter.setDataList(list);
+        }
 
+    }
 }

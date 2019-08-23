@@ -55,7 +55,7 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
                 holder.setText(R.id.item1,position+1+"");
                 holder.setText(R.id.item2,data.getSpare().getSpareName());
                 holder.setText(R.id.item3,data.getSpare().getSpecifications());
-                holder.setText(R.id.item4,String.valueOf(data.getSpare().getNumber()));
+                holder.setText(R.id.item4,String.valueOf(data.getAmount()));
             }
 
         };
@@ -69,9 +69,9 @@ public class GoodsInfoActivity extends BaseActivity implements View.OnClickListe
                 intent.putExtra("RepairUser",dataBean.getRepair().getRepairUser());
                 intent.putExtra("RepairCreateTime",dataBean.getRepair().getCreateTime());
                 intent.putExtra("RepairContent",dataBean.getRepair().getContent());*/
-        goods_info_text.setText(String.format("领料单号：%s %n申请时间：%s %n申报人：%s %n报修编号：%s %n报修设备：%s %n报修人：%s %n报修时间：%s %n报修内容：%s %n",
+        goods_info_text.setText(String.format("领料单号：%s %n申请时间：%s %n申报人：%s %n报修编号：%s %n设备ID：%s %n报修人：%s %n报修时间：%s %n报修内容：%s %n",
                 getIntent().getStringExtra("PickNo"),getIntent().getStringExtra("CreateTime"),getIntent().getStringExtra("PickUser"),
-                getIntent().getStringExtra("RepairId"),"",getIntent().getStringExtra("RepairUser"),
+                getIntent().getStringExtra("RepairId"),getIntent().getStringExtra("RepairDeviceId"),getIntent().getStringExtra("RepairUser"),
                 getIntent().getStringExtra("RepairCreateTime"),getIntent().getStringExtra("RepairContent")));
     }
 

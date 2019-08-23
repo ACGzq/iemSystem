@@ -19,7 +19,7 @@
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/thok_add_goods"
+            android:text="添加备件"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_color_white"
@@ -51,7 +51,7 @@
         app:layout_constraintEnd_toStartOf="@id/search_bt"
         app:layout_constraintTop_toBottomOf="@+id/add_goods_toolbar"
         app:layout_constraintBottom_toBottomOf="@id/search_bt"
-        android:text="无人机"
+        android:hint="备件名称"
         android:background="@drawable/text_bg"/>
     <Button
         android:id="@+id/search_bt"

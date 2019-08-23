@@ -34,6 +34,14 @@ public class AutoFilterListAdapter<T> extends BaseAdapter {
         backDataList = dataList;
     }
 
+    public List<T> getDataList() {
+        return dataList;
+    }
+
+    public void setDataList(List<T> dataList) {
+        this.dataList = dataList;
+    }
+
     @Override
     public int getCount() {
         return dataList.size();

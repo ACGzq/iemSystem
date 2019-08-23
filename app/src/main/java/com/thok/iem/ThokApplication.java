@@ -6,6 +6,7 @@ import android.util.Log;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.utils.OwnUncaughtExceptionHandler;
 import com.thok.iem.utils.SharedPreferencesUtil;
 import com.uuzuche.lib_zxing.activity.ZXingLibrary;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +19,6 @@ public class ThokApplication extends Application {
     public static String userName= "";
     public static String realName;
     public static boolean isPhone;
-
     @Override
     public void onCreate() {
         Log.d("iem_ThokApplication","ThokApplication_start");
@@ -39,6 +39,7 @@ public class ThokApplication extends Application {
         isPhone = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         RequestURLs.setHostUrl(SharedPreferencesUtil.getInstance(this).getString("APIHost",RequestURLs.getHostUrl()));
         super.onCreate();
+        //Thread.setDefaultUncaughtExceptionHandler(new OwnUncaughtExceptionHandler());
     }
 
 }

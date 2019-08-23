@@ -237,7 +237,7 @@ public class TaskSubmitActivity extends BaseActivity implements View.OnClickList
                 return;
             case TASK_PATROL://设备巡检
                 submitTitle.setText(getString(R.string.thok_patrol));
-                equipment_info.setText(" 设备编号：123 \n 设备名称：123 \n 存放位置：123 ");
+                equipment_info.setText(" 设备编号： \n 设备名称： \n 存放位置： ");
                 repair_time.setVisibility(View.GONE);
                 request_time.setVisibility(View.GONE);
                 input_title.setText("检查要求");

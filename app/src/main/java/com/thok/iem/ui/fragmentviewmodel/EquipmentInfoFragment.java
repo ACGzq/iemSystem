@@ -127,7 +127,7 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
                 }else{
                     holder.getConvertView().setTag("default");
                     holder.setText(R.id.item_title,data.getDeviceName());
-                    holder.setText(R.id.item_text,String.format(equipmentInfoString,data.getDeviceNo(),data.getSpecificationType(),data.getPositionName(),dicMap.get(data.getStatusId())));
+                    holder.setText(R.id.item_text,String.format(equipmentInfoString,getVaule(data.getDeviceNo()),getVaule(data.getSpecificationType()),getVaule(data.getPositionName()),getVaule(data.getStatusName())));
                     holder.setText(R.id.state_text,dicMap.get(data.getStatusId()));
                     ImageRequest.getRequest(context).loadImage(data.getImgUrl(),holder.getView(R.id.img_view),3);
                 }
@@ -159,6 +159,10 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
         });
         recyclerView.setAdapter(adapter);
         return rootView;
+    }
+    private String getVaule(String stt){
+        return  TextUtils.isEmpty(stt)?"(空)":stt;
+
     }
     public void initDicDataAndSearch(String keyWord,int page){
         DicTypeRequest dicTypeRequest = new DicTypeRequest();
@@ -242,7 +246,7 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
         SearchDeviceRequest searchDeviceRequest = new SearchDeviceRequest();
         searchDeviceRequest.setToken(ThokApplication.requestToken);
         if(!TextUtils.isEmpty(keyWord)){
-            searchDeviceRequest.setDeviceNo(keyWord);
+            searchDeviceRequest.setDeviceName(keyWord);
         }
         if(page > 0){
             searchDeviceRequest.setPageNo(String.valueOf(page));
@@ -344,11 +348,17 @@ public class EquipmentInfoFragment extends BaseFragment implements View.OnClickL
 
     public void updataUi(String str){
         printLog(getTag(),str);
-        DeviceBean deviceBean = new Gson().fromJson(str,DeviceBean.class);
-        if(deviceBean!=null){
-            input_edit.setQuery(deviceBean.getDeviceNo(),true);
-        }else{
-            input_edit.setQuery(str,true);
+        try {
+            DeviceBean deviceBean = new Gson().fromJson(str,DeviceBean.class);
+            if(deviceBean!=null){
+                input_edit.setQuery(deviceBean.getDeviceName(),true);
+            }else{
+                input_edit.setQuery(str,true);
+            }
+        }catch (Exception e){
+            printLog(getTag(),"jsonStr = " + str);
+            printLog(getTag(),"Exception = " + e.getMessage());
+            Toast.makeText(getActivity(),"二维码解析失败",Toast.LENGTH_SHORT).show();
         }
 
     }

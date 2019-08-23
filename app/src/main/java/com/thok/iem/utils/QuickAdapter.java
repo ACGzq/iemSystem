@@ -90,6 +90,8 @@ public abstract class QuickAdapter<T> extends RecyclerView.Adapter<QuickAdapter.
         }
 
         public void setText(int id, String value){
+            if(value == null)
+                return;
             TextView view = getView(id);
             view.setText(value);
         }

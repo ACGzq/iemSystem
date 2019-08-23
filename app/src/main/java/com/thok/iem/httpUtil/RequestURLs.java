@@ -1,7 +1,10 @@
 package com.thok.iem.httpUtil;
 
+
+import com.thok.iem.BuildConfig;
+
 public class RequestURLs {
-    public static String hostUrl = "http://192.168.1.102:8088";
+    public static String hostUrl = BuildConfig.API_URL;
     public static final String URL_SEARCH_DEVICE = "/device/search";
     public static final String URL_SEARCHPAGE_DEVICE = "/device/searchpage";
     public static final String URL_FIND_DEVICE = "/device/find";

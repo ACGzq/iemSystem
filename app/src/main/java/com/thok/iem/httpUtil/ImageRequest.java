@@ -12,6 +12,7 @@ import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.BitmapCallback;
 import com.lzy.okgo.model.Response;
+import com.thok.iem.BuildConfig;
 import com.thok.iem.R;
 
 public class ImageRequest {
@@ -39,6 +40,9 @@ public class ImageRequest {
     }
     public void loadImage(String url, ImageView view, int rate){
         if(!TextUtils.isEmpty(url) && (url.toLowerCase().contains("jpg") || url.toLowerCase().contains("png"))){
+            if(!url.contains("http")){
+                url = RequestURLs.getHostUrl() + url;
+            }
             Log.d(context.getClass().getName(),"starLoadImg=");
             OkGo.<Bitmap>get(url)
                     .tag(this)

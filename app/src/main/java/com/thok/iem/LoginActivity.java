@@ -39,6 +39,7 @@ import com.lzy.okgo.model.Response;
 import com.thok.iem.httpUtil.ErrCode;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
 import com.thok.iem.httpUtil.RequestURLs;
+import com.thok.iem.model.FilterHistory;
 import com.thok.iem.model.LoginRequest;
 import com.thok.iem.model.LoginResponse;
 import com.thok.iem.model.UserBean;

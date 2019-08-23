@@ -41,6 +41,7 @@
             android:textColor="@color/text_color_black"
             android:text="备件名称"/>
         <android.support.v7.widget.SearchView
+            app:queryHint="输入名称"
             android:layout_marginLeft="5dp"
             android:layout_marginTop="5dp"
             android:id="@+id/input_edit"
@@ -53,8 +54,8 @@
             app:layout_constraintEnd_toStartOf="@id/inquiry_button"
             android:iconifiedByDefault="false"
             />
-
     <Button
+        android:stateListAnimator="@null"
         android:id="@+id/inquiry_button"
         android:layout_width="0dp"
         android:layout_height="33dp"
@@ -93,4 +94,15 @@
         app:layout_constraintTop_toBottomOf="@id/input_edit"
         app:layout_constraintStart_toStartOf="@id/input_edit"
         app:layout_constraintEnd_toEndOf="@id/input_edit" />
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/example_show"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/example1" />
+
 </android.support.constraint.ConstraintLayout>
