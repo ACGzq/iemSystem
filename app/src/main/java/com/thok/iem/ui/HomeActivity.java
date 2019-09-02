@@ -15,24 +15,15 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.text.InputType;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Response;
 import com.thok.iem.R;
-
 import com.thok.iem.ThokApplication;
 import com.thok.iem.httpUtil.ErrCode;
 import com.thok.iem.httpUtil.OkGoJsonCallback;
@@ -42,8 +33,9 @@ import com.thok.iem.model.DicTypeResponse;
 import com.thok.iem.ui.fragmentviewmodel.EquipmentInfoFragment;
 import com.thok.iem.ui.fragmentviewmodel.HomePageFragment;
 import com.thok.iem.ui.fragmentviewmodel.MyFragment;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.yzq.zxinglibrary.android.CaptureActivity;
+import com.yzq.zxinglibrary.bean.ZxingConfig;
+import com.yzq.zxinglibrary.common.Constant;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -225,13 +217,8 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode == TASK_QR_SCANER && data!=null){
-            Bundle bundle = data.getExtras();
-            if (bundle == null) {
-                printLog(tag,"nothing");
-                return;
-            }
-            ((EquipmentInfoFragment)equipentInfoFragment).updataUi(bundle.getString(CodeUtils.RESULT_STRING));
+        if(resultCode == RESULT_OK && requestCode == TASK_QR_SCANER){
+            ((EquipmentInfoFragment)equipentInfoFragment).updataUi(data.getStringExtra(Constant.CODED_CONTENT));
         }else{
             printLog(tag,"nothing");
         }
@@ -240,6 +227,15 @@ public class HomeActivity extends BaseActivity implements MyFragment.OnFragmentI
     public void startQrScan(){
         if(PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)){
             Intent intent = new Intent(this, CaptureActivity.class);
+            ZxingConfig config = new ZxingConfig();
+            // config.setPlayBeep(false);//是否播放扫描声音 默认为true
+            // config.setShake(false);//是否震动  默认为true
+             config.setDecodeBarCode(false);//是否扫描条形码 默认为true
+            // config.setReactColor(R.color.colorAccent);//设置扫描框四个角的颜色 默认为白色
+            // config.setFrameLineColor(R.color.colorAccent);//设置扫描框边框颜色 默认无色
+            // config.setScanLineColor(R.color.colorAccent);//设置扫描线的颜色 默认白色
+            config.setFullScreenScan(false);//是否全屏扫描  默认为true  设为false则只会在扫描框中扫描
+            intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
             startActivityForResult(intent, BaseActivity.TASK_QR_SCANER);
         }else{
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},BaseActivity.TASK_PERMISSION_REQUEST);

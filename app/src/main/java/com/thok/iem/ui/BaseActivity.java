@@ -36,6 +36,7 @@ public static ArrayList<Activity> activityArrayList = new ArrayList<>();
     public static final  String INQUIRY_RESULT_DATA_ID = "INQUIRY_RESULT_DATA_NAME_ID";
     public static final String INTENT_FILTER_ACTION = "com.thok.iem.action";
     public static final String LAST_LOGIN_USER_ID = "LAST_LOGIN_USER_ID";
+    public static final String RESULT_STRING = "+";
     public static final int TASK_PERMISSION_REQUEST = 1314;
     public static final int TASK_QR_SCANER = 10;
     public static final int TASK_DONE = 6666;

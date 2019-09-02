@@ -5,8 +5,8 @@ android {
         applicationId "com.thok.iem"
         minSdkVersion 24
         targetSdkVersion 27
-        versionCode 4
-        versionName "1.1.0823"
+        versionCode 5
+        versionName "1.1.0830"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         flavorDimensions "default"
     }
@@ -18,7 +18,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug{
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -27,15 +27,15 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
-    productFlavors{
-        a_local{
-            buildConfigField("String","API_URL","\"http://192.168.1.102:8088\"")
+    productFlavors {
+        a_local {
+            buildConfigField("String", "API_URL", "\"http://192.168.1.102:8088\"")
         }
-        office{
-            buildConfigField("String","API_URL","\"http://10.73.198.187:8088\"")
+        office {
+            buildConfigField("String", "API_URL", "\"http://10.73.198.187:8088\"")
         }
-        factory{
-            buildConfigField("String","API_URL","\"http://192.168.10.223:8088\"")
+        factory {
+            buildConfigField("String", "API_URL", "\"http://192.168.10.223:8088\"")
         }
     }
     buildToolsVersion '28.0.3'
@@ -57,17 +57,9 @@ dependencies {
     implementation('com.github.gzu-liyujiang.AndroidPicker:WheelPicker:1.5.6.20181018') {
         exclude group: 'com.android.support'
     }
-    implementation 'cn.yipianfengye.android:zxing-library:2.2'
-    /*//基础工具库
-    implementation "com.github.tamsiree.RxTool:RxKit:2.3.9"
-    //UI库
-    implementation "com.github.tamsiree.RxTool:RxUI:2.3.9"
-    //相机库
-    implementation "com.github.tamsiree.RxTool:RxCamera:2.3.9"
-    //功能库（Zxing扫描与生成二维码条形码 支付宝 微信）
-    implementation "com.github.tamsiree.RxTool:RxFeature:2.3.9"
-    //ArcGis For Android工具库（API：100.1以上版本）
-    implementation "com.github.tamsiree.RxTool:RxArcGisKit:2.3.9"*/
+    //implementation 'cn.yipianfengye.android:zxing-library:2.2'
+    //implementation 'com.dlazaro66.qrcodereaderview:qrcodereaderview:2.0.3'
+    implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'org.jetbrains:annotations:15.0'
 

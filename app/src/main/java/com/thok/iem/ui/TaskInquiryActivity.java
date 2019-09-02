@@ -53,6 +53,7 @@ import com.thok.iem.utils.AutoFilterListAdapter;
 import com.thok.iem.utils.DataBaseHelp;
 import com.thok.iem.utils.QuickAdapter;
 import com.thok.iem.utils.SharedPreferencesUtil;
+import com.thok.iem.utils.StaticSave;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,6 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     private QuickAdapter recycleAdapter;
     private AutoFilterListAdapter historyAdapter;
     private Intent intent;
-    private String[] mStrs = {"thok"};
     private ListView mListView;
     private String queryString;
     private int presentPage = 0;
@@ -101,7 +101,7 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
         //input_edit.setSubmitButtonEnabled(true);
         //((ImageView)input_edit.findViewById(R.id.search_go_btn)).setImageResource(R.drawable.text_bg);
         mListView = findViewById(R.id.list_view);
-        historyAdapter = new AutoFilterListAdapter(this, mStrs);
+        historyAdapter = new AutoFilterListAdapter(this, StaticSave.HistoryList);
         mListView.setAdapter(historyAdapter);
         mListView.setOnItemClickListener(this);
         //listview启动过滤
@@ -610,24 +610,6 @@ public class TaskInquiryActivity extends BaseActivity implements QuickAdapter.On
     public void saveHistory(String str){
         if(TextUtils.isEmpty(str))
             return;
-        DataBaseHelp dbHelp = new DataBaseHelp(this, FilterHistory.class);
-        SQLiteDatabase dataBase = dbHelp.getWritableDatabase();
-        dataBase.delete(FilterHistory.class.getSimpleName(),"historyStr like ?",new String[]{str});
-        dataBase.delete(FilterHistory.class.getSimpleName(),"id = ?",new String[]{"10"});
-        ContentValues values = new ContentValues();
-        values.put("historyStr",str);
-        dataBase.insert(FilterHistory.class.getSimpleName(),null,values);
-        SQLiteDatabase readable = dbHelp.getReadableDatabase();
-        Cursor cursor = readable.rawQuery("select * from FilterHistory",new String[]{""});
-        cursor.getCount();
-        if(cursor.moveToFirst()){
-            ArrayList<String> list = new ArrayList<>();
-            list.add(cursor.getString(cursor.getColumnIndex("historyStr")));
-           while (cursor.moveToNext()){
-               list.add(cursor.getString(cursor.getColumnIndex("historyStr")));
-           }
-           historyAdapter.setDataList(list);
-        }
-
+        StaticSave.HistoryList.add(str);
     }
 }

@@ -1,17 +1,13 @@
 package com.thok.iem.ui.fragmentviewmodel;
 
-import android.Manifest;
+
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +15,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.support.v7.widget.SearchView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
-
 import com.lzy.okgo.model.Response;
 import com.thok.iem.R;
 import com.thok.iem.ThokApplication;
@@ -35,11 +29,8 @@ import com.thok.iem.model.DevicesResponse;
 import com.thok.iem.model.DicTypeRequest;
 import com.thok.iem.model.DicTypeResponse;
 import com.thok.iem.model.SearchDeviceRequest;
-import com.thok.iem.ui.BaseActivity;
 import com.thok.iem.ui.HomeActivity;
 import com.thok.iem.utils.QuickAdapter;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

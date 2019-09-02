@@ -36,23 +36,21 @@ import com.thok.iem.httpUtil.RequestURLs;
 import com.thok.iem.model.AddRepairDeviceRequest;
 import com.thok.iem.model.BaseResponse;
 import com.thok.iem.model.DeviceBean;
-import com.thok.iem.model.DicTypeRequest;
-import com.thok.iem.model.DicTypeResponse;
 import com.thok.iem.model.MaintenancerHistoryAddRequest;
 import com.thok.iem.model.MaintenancerHistoryAddResponse;
 import com.thok.iem.model.PollingAddRequest;
 import com.thok.iem.model.PollingAddResponse;
 import com.thok.iem.model.RepairFinishRequest;
 import com.thok.iem.model.RepairFinishResponse;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.yzq.zxinglibrary.android.CaptureActivity;
+import com.yzq.zxinglibrary.bean.ZxingConfig;
+import com.yzq.zxinglibrary.common.Constant;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import cn.qqtheme.framework.picker.DateTimePicker;
@@ -596,6 +594,9 @@ public class TaskSubmitActivity extends BaseActivity implements View.OnClickList
         if(ThokApplication.isPhone){
             if(PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA)){
                 Intent intent = new Intent(this, CaptureActivity.class);
+                ZxingConfig config = new ZxingConfig();
+                config.setFullScreenScan(false);//是否全屏扫描  默认为true  设为false则只会在扫描框中扫描
+                intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
                 startActivityForResult(intent, TASK_QR_SCANER);
             }else{
                 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},TASK_PERMISSION_REQUEST);
@@ -633,13 +634,8 @@ public class TaskSubmitActivity extends BaseActivity implements View.OnClickList
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode == TASK_QR_SCANER && data!=null){
-            Bundle bundle = data.getExtras();
-            if (bundle == null) {
-                printLog(tag,"nothing");
-                return;
-            }
-            createDeviceBean(bundle.getString(CodeUtils.RESULT_STRING));
+        if(resultCode == RESULT_OK && requestCode == TASK_QR_SCANER ){
+            createDeviceBean(data.getStringExtra(Constant.CODED_CONTENT));
         }else{
             printLog(tag,"nothing");
         }

@@ -6,9 +6,9 @@ import android.util.Log;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.thok.iem.httpUtil.RequestURLs;
-import com.thok.iem.utils.OwnUncaughtExceptionHandler;
+
 import com.thok.iem.utils.SharedPreferencesUtil;
-import com.uuzuche.lib_zxing.activity.ZXingLibrary;
+
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -35,7 +35,6 @@ public class ThokApplication extends Application {
         OkGo.getInstance().init(this)
             .setOkHttpClient(builder.build())
             .setRetryCount(1);//全局统一超时重连次数，默认为三次，那么最差的情况会请求4次(一次原始请求，三次重连请求)，不需要可以设置为0
-        ZXingLibrary.initDisplayOpinion(this);
         isPhone = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         RequestURLs.setHostUrl(SharedPreferencesUtil.getInstance(this).getString("APIHost",RequestURLs.getHostUrl()));
         super.onCreate();
